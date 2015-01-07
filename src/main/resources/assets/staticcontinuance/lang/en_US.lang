@@ -1,0 +1,11 @@
+item.staticcontinuance:copperIngot.name=Copper Ingot
+item.staticcontinuance:copperGear.name=Copper Gear
+item.staticcontinuance:zincIngot.name=Zinc Ingot
+
+tile.staticcontinuance:copperOre.name=Copper Ore
+tile.staticcontinuance:copperBlock.name=Copper Block
+tile.staticcontinuance:zincOre.name=Zinc Ore
+tile.staticcontinuance:zincBlock.name=Zinc Block
+tile.staticcontinuance:brassBlock.name=Brass Block
+
+itemGroup.staticcontinuance=Static Continuance

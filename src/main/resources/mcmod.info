@@ -1,0 +1,21 @@
+[
+{
+  "modid": "staticcontinuance",
+  "name": "Static Continuance",
+  "description": "Stuff.",
+  "version": "0.1",
+  "mcversion": "1.8",
+  "url": "http://falconerd.com/staticcontinuance",
+  "updateUrl": "",
+  "authors": [
+    "Falconerd"
+  ],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [
+  ],
+  "parent":"",
+  "dependencies": [
+  ]
+}
+]
