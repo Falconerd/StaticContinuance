@@ -1,0 +1,329 @@
+{
+  "variants": {
+    "normal": {"model": "staticcontinuance:pipe_straight"},
+    "down=false,east=false,north=false,south=false,up=false,west=false": {"model": "staticcontinuance:pipe_core"},
+    "down=false,east=false,north=true,south=true,up=false,west=false": {
+      "model": "staticcontinuance:pipe_straight",
+      "uvlock": true
+    },
+    "down=false,east=true,north=false,south=false,up=false,west=true": {
+      "model": "staticcontinuance:pipe_straight",
+      "y": 90,
+      "uvlock": true
+    },
+    "down=true,east=false,north=false,south=false,up=true,west=false": {
+      "model": "staticcontinuance:pipe_straight",
+      "x": 90,
+      "uvlock": true
+    },
+    "down=false,east=true,north=true,south=true,up=false,west=true": {
+      "model": "staticcontinuance:pipe_x",
+      "uvlock": true
+    },
+    "down=true,east=false,north=true,south=true,up=true,west=false": {
+      "model": "staticcontinuance:pipe_x",
+      "x": 90,
+      "y": 90,
+      "uvlock": true
+    },
+    "down=true,east=true,north=false,south=false,up=true,west=true": {
+      "model": "staticcontinuance:pipe_x",
+      "x": 90,
+      "uvlock": true
+    },
+    "down=false,east=false,north=true,south=false,up=false,west=false": {
+      "model": "staticcontinuance:pipe_single",
+      "uvlock": true
+    },
+    "down=false,east=true,north=false,south=false,up=false,west=false": {
+      "model": "staticcontinuance:pipe_single",
+      "y": 90,
+      "uvlock": true
+    },
+    "down=false,east=false,north=false,south=true,up=false,west=false": {
+      "model": "staticcontinuance:pipe_single",
+      "y": 180,
+      "uvlock": true
+    },
+    "down=false,east=false,north=false,south=false,up=false,west=true": {
+      "model": "staticcontinuance:pipe_single",
+      "y": 270,
+      "uvlock": true
+    },
+    "down=true,east=false,north=false,south=false,up=false,west=false": {
+      "model": "staticcontinuance:pipe_single",
+      "x": 90,
+      "uvlock": true
+    },
+    "down=false,east=false,north=false,south=false,up=true,west=false": {
+      "model": "staticcontinuance:pipe_single",
+      "x": 270,
+      "uvlock": true
+    },
+    "down=true,east=false,north=true,south=false,up=false,west=false": {
+      "model": "staticcontinuance:pipe_bend",
+      "uvlock": true
+    },
+    "down=true,east=true,north=false,south=false,up=false,west=false": {
+      "model": "staticcontinuance:pipe_bend",
+      "y": 90,
+      "uvlock": true
+    },
+    "down=true,east=false,north=false,south=true,up=false,west=false": {
+      "model": "staticcontinuance:pipe_bend",
+      "y": 180,
+      "uvlock": true
+    },
+    "down=true,east=false,north=false,south=false,up=false,west=true": {
+      "model": "staticcontinuance:pipe_bend",
+      "y": 270,
+      "uvlock": true
+    },
+    "down=false,east=false,north=true,south=false,up=true,west=false": {
+      "model": "staticcontinuance:pipe_bend",
+      "x": 180,
+      "y": 180,
+      "uvlock": true
+    },
+    "down=false,east=true,north=false,south=false,up=true,west=false": {
+      "model": "staticcontinuance:pipe_bend",
+      "x": 180,
+      "y": 270,
+      "uvlock": true
+    },
+    "down=false,east=false,north=false,south=true,up=true,west=false": {
+      "model": "staticcontinuance:pipe_bend",
+      "x": 180,
+      "y": 0,
+      "uvlock": true
+    },
+    "down=false,east=false,north=false,south=false,up=true,west=true": {
+      "model": "staticcontinuance:pipe_bend",
+      "x": 180,
+      "y": 90,
+      "uvlock": true
+    },
+    "down=false,east=true,north=true,south=false,up=false,west=false": {
+      "model": "staticcontinuance:pipe_bend_horizontal",
+      "uvlock": true
+    },
+    "down=false,east=true,north=false,south=true,up=false,west=false": {
+      "model": "staticcontinuance:pipe_bend_horizontal",
+      "y": 90,
+      "uvlock": true
+    },
+    "down=false,east=false,north=false,south=true,up=false,west=true": {
+      "model": "staticcontinuance:pipe_bend_horizontal",
+      "y": 180,
+      "uvlock": true
+    },
+    "down=false,east=false,north=true,south=false,up=false,west=true": {
+      "model": "staticcontinuance:pipe_bend_horizontal",
+      "y": 270,
+      "uvlock": true
+    },
+    "down=false,east=true,north=true,south=false,up=false,west=true": {
+      "model": "staticcontinuance:pipe_t",
+      "uvlock": true
+    },
+    "down=false,east=true,north=true,south=true,up=false,west=false": {
+      "model": "staticcontinuance:pipe_t",
+      "y": 90,
+      "uvlock": true
+    },
+    "down=false,east=true,north=false,south=true,up=false,west=true": {
+      "model": "staticcontinuance:pipe_t",
+      "y": 180,
+      "uvlock": true
+    },
+    "down=false,east=false,north=true,south=true,up=false,west=true": {
+      "model": "staticcontinuance:pipe_t",
+      "y": 270,
+      "uvlock": true
+    },
+    "down=false,east=true,north=false,south=false,up=true,west=true": {
+      "model": "staticcontinuance:pipe_t",
+      "x": -90,
+      "uvlock": true
+    },
+    "down=false,east=false,north=true,south=true,up=true,west=false": {
+      "model": "staticcontinuance:pipe_t",
+      "x": -90,
+      "y": 90,
+      "uvlock": true
+    },
+    "down=true,east=true,north=false,south=false,up=false,west=true": {
+      "model": "staticcontinuance:pipe_t",
+      "x": 90,
+      "uvlock": true
+    },
+    "down=true,east=false,north=true,south=true,up=false,west=false": {
+      "model": "staticcontinuance:pipe_t",
+      "x": 90,
+      "y": 90,
+      "uvlock": true
+    },
+    "down=true,east=false,north=false,south=true,up=true,west=false": {
+      "model": "staticcontinuance:pipe_t_vertical",
+      "y": 180,
+      "uvlock": true
+    },
+    "down=true,east=false,north=false,south=false,up=true,west=true": {
+      "model": "staticcontinuance:pipe_t_vertical",
+      "y": 270,
+      "uvlock": true
+    },
+    "down=true,east=false,north=true,south=false,up=true,west=false": {
+      "model": "staticcontinuance:pipe_t_vertical",
+      "y": 0,
+      "uvlock": true
+    },
+    "down=true,east=true,north=false,south=false,up=true,west=false": {
+      "model": "staticcontinuance:pipe_t_vertical",
+      "y": 90,
+      "uvlock": true
+    },
+    "down=true,east=true,north=true,south=false,up=false,west=false": {
+      "model": "staticcontinuance:pipe_y",
+      "uvlock": true
+    },
+    "down=true,east=true,north=false,south=true,up=false,west=false": {
+      "model": "staticcontinuance:pipe_y",
+      "y": 90,
+      "uvlock": true
+    },
+    "down=true,east=false,north=false,south=true,up=false,west=true": {
+      "model": "staticcontinuance:pipe_y",
+      "y": 180,
+      "uvlock": true
+    },
+    "down=true,east=false,north=true,south=false,up=false,west=true": {
+      "model": "staticcontinuance:pipe_y",
+      "y": 270,
+      "uvlock": true
+    },
+    "down=false,east=true,north=true,south=false,up=true,west=false": {
+      "model": "staticcontinuance:pipe_y",
+      "x": 180,
+      "y": 270,
+      "uvlock": true
+    },
+    "down=false,east=true,north=false,south=true,up=true,west=false": {
+      "model": "staticcontinuance:pipe_y",
+      "x": 180,
+      "y": 0,
+      "uvlock": true
+    },
+    "down=false,east=false,north=false,south=true,up=true,west=true": {
+      "model": "staticcontinuance:pipe_y",
+      "x": 180,
+      "y": 90,
+      "uvlock": true
+    },
+    "down=false,east=false,north=true,south=false,up=true,west=true": {
+      "model": "staticcontinuance:pipe_y",
+      "x": 180,
+      "y": 180,
+      "uvlock": true
+    },
+    "down=true,east=true,north=true,south=true,up=false,west=true": {
+      "model": "staticcontinuance:pipe_v",
+      "uvlock": true
+    },
+    "down=false,east=true,north=true,south=true,up=true,west=true": {
+      "model": "staticcontinuance:pipe_v",
+      "x": 180,
+      "uvlock": true
+    },
+    "down=true,east=true,north=false,south=true,up=true,west=true": {
+      "model": "staticcontinuance:pipe_v",
+      "x": 90,
+      "uvlock": true
+    },
+    "down=true,east=false,north=true,south=true,up=true,west=true": {
+      "model": "staticcontinuance:pipe_v",
+      "x": 90,
+      "y": 90,
+      "uvlock": true
+    },
+    "down=true,east=true,north=true,south=false,up=true,west=true": {
+      "model": "staticcontinuance:pipe_v",
+      "x": 90,
+      "y": 180,
+      "uvlock": true
+    },
+    "down=true,east=true,north=true,south=true,up=true,west=false": {
+      "model": "staticcontinuance:pipe_v",
+      "x": 90,
+      "y": 270,
+      "uvlock": true
+    },
+    "down=true,east=true,north=true,south=false,up=false,west=true": {
+      "model": "staticcontinuance:pipe_ty",
+      "uvlock": true
+    },
+    "down=true,east=true,north=true,south=true,up=false,west=false": {
+      "model": "staticcontinuance:pipe_ty",
+      "y": 90,
+      "uvlock": true
+    },
+    "down=true,east=true,north=false,south=true,up=false,west=true": {
+      "model": "staticcontinuance:pipe_ty",
+      "y": 180,
+      "uvlock": true
+    },
+    "down=true,east=false,north=true,south=true,up=false,west=true": {
+      "model": "staticcontinuance:pipe_ty",
+      "y": 270,
+      "uvlock": true
+    },
+    "down=false,east=true,north=true,south=false,up=true,west=true": {
+      "model": "staticcontinuance:pipe_ty",
+      "x": 180,
+      "y": 180,
+      "uvlock": true
+    },
+    "down=false,east=true,north=true,south=true,up=true,west=false": {
+      "model": "staticcontinuance:pipe_ty",
+      "x": 180,
+      "y": 270,
+      "uvlock": true
+    },
+    "down=false,east=true,north=false,south=true,up=true,west=true": {
+      "model": "staticcontinuance:pipe_ty",
+      "x": 180,
+      "y": 0,
+      "uvlock": true
+    },
+    "down=false,east=false,north=true,south=true,up=true,west=true": {
+      "model": "staticcontinuance:pipe_ty",
+      "x": 180,
+      "y": 90,
+      "uvlock": true
+    },
+    "down=true,east=false,north=false,south=true,up=true,west=true": {
+      "model": "staticcontinuance:pipe_ty_vertical",
+      "y": 270,
+      "uvlock": true
+    },
+    "down=true,east=true,north=false,south=true,up=true,west=false": {
+      "model": "staticcontinuance:pipe_ty_vertical",
+      "y": 180,
+      "uvlock": true
+    },
+    "down=true,east=true,north=true,south=false,up=true,west=false": {
+      "model": "staticcontinuance:pipe_ty_vertical",
+      "y": 90,
+      "uvlock": true
+    },
+    "down=true,east=false,north=true,south=false,up=true,west=true": {
+      "model": "staticcontinuance:pipe_ty_vertical",
+      "y": 0,
+      "uvlock": true
+    },
+    "down=true,east=true,north=true,south=true,up=true,west=true": {
+      "model": "staticcontinuance:pipe_all",
+      "uvlock": true
+    }
+  }
+}

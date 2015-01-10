@@ -1,8 +1,9 @@
-package com.falconerd.staticcontinuance.block;
+package com.falconerd.staticcontinuance.machine.tank;
 
-import com.falconerd.staticcontinuance.tileentity.TileEntityTank;
+import com.falconerd.staticcontinuance.machine.BlockMachine;
 import com.falconerd.staticcontinuance.utility.FluidHelper;
 import com.falconerd.staticcontinuance.utility.ItemHelper;
+import com.falconerd.staticcontinuance.utility.LogHelper;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -10,15 +11,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class BlockTank extends BlockContainerSC
+public class BlockTank extends BlockMachine
 {
     public BlockTank()
     {
@@ -26,32 +24,35 @@ public class BlockTank extends BlockContainerSC
         this.setUnlocalizedName("tank");
     }
 
-    @SideOnly(Side.CLIENT)
-    public EnumWorldBlockLayer getBlockLayer()
-    {
-        return EnumWorldBlockLayer.CUTOUT;
-    }
-
-    public boolean isFullCube()
+    @Override
+    public boolean canBeReplacedByLeaves(IBlockAccess world, BlockPos pos)
     {
         return false;
     }
 
+    @Override
+    public boolean isFlammable(IBlockAccess world, BlockPos pos, EnumFacing face)
+    {
+        return false;
+    }
+
+    @Override
     public boolean isOpaqueCube()
     {
         return false;
     }
 
     @Override
-    public int getRenderType()
-    {
-        return 3;
-    }
-
-    @SideOnly(Side.CLIENT)
-    public boolean shouldSideBeRendered(IBlockAccess worldIn, BlockPos pos, EnumFacing side)
+    public boolean isSideSolid(IBlockAccess world, BlockPos pos, EnumFacing side)
     {
         return true;
+    }
+
+    @Override
+    public int getLightValue(IBlockAccess world, BlockPos pos)
+    {
+        TileEntityTank tank = (TileEntityTank) world.getTileEntity(pos);
+        return tank != null ? tank.getFluidLightLevel() : 0;
     }
 
     @Override
@@ -63,6 +64,10 @@ public class BlockTank extends BlockContainerSC
             return super.onBlockActivated(worldIn, pos, state, playerIn, side, hitX, hitY, hitZ);
         }
         TileEntityTank tank = (TileEntityTank) te;
+
+        tank.updateConnections(true);
+        LogHelper.info(tank.getConnections());
+
         ItemStack item = playerIn.inventory.getCurrentItem();
         if (item == null)
         {
@@ -131,7 +136,12 @@ public class BlockTank extends BlockContainerSC
                 return true;
             }
         }
-        return super.onBlockActivated(worldIn, pos, state, playerIn, side, hitX, hitY, hitZ);
+        if (!worldIn.isRemote)
+        {
+            wrenchInteraction(playerIn, worldIn, pos);
+        }
+
+        return false;
     }
 
     @Override

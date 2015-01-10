@@ -9,6 +9,7 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 @GameRegistry.ObjectHolder(Reference.MOD_ID)
 public class ModItems
 {
+    public static final ItemSC wrench = new ItemWrench();
     public static final ItemSC copperIngot = new ItemCopperIngot();
     public static final ItemSC copperGear = new ItemCopperGear();
     public static final ItemSC zincIngot = new ItemZincIngot();
@@ -17,6 +18,7 @@ public class ModItems
 
     public static void init()
     {
+        GameRegistry.registerItem(wrench, "wrench");
         GameRegistry.registerItem(copperIngot, "copperIngot");
         GameRegistry.registerItem(copperGear, "copperGear");
         GameRegistry.registerItem(zincIngot, "zincIngot");
@@ -27,5 +29,6 @@ public class ModItems
     public static void registerModels()
     {
         Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(copperIngot, 0, new ModelResourceLocation(Reference.MOD_ID + ":" + "copperIngot", "inventory"));
+        Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(wrench, 0, new ModelResourceLocation(Reference.MOD_ID + ":" + "wrench", "inventory"));
     }
 }

@@ -1,6 +1,7 @@
 package com.falconerd.staticcontinuance.init;
 
 import com.falconerd.staticcontinuance.block.*;
+import com.falconerd.staticcontinuance.machine.tank.BlockTank;
 import com.falconerd.staticcontinuance.pipes.BlockPipe;
 import com.falconerd.staticcontinuance.reference.Reference;
 import net.minecraft.client.Minecraft;

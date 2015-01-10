@@ -9,4 +9,9 @@ public class Reference
     public static final String CLIENT_PROXY_CLASS = GROUP + ".proxy.ClientProxy";
     public static final String SERVER_PROXY_CLASS = GROUP + ".proxy.ServerProxy";
     public static final String GUI_FACTORY_CLASS = GROUP + ".client.gui.GuiFactory";
+    public static final String[] MACHINE_MODES = {
+            "In",
+            "Out",
+            "Disabled"
+    };
 }

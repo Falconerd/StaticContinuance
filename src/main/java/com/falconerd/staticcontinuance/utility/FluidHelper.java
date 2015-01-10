@@ -2,6 +2,7 @@ package com.falconerd.staticcontinuance.utility;
 
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.*;
 
 public class FluidHelper
@@ -30,5 +31,23 @@ public class FluidHelper
             return fluidStack;
         }
         return null;
+    }
+
+    public static ResourceLocation getFluidResourceLocation(FluidStack fluidStack)
+    {
+        String location = "";
+
+        if (fluidStack.getFluid().equals(FluidRegistry.WATER))
+        {
+            location = "minecraft:textures/blocks/water_still.png";
+        } else if (fluidStack.getFluid().equals(FluidRegistry.LAVA))
+        {
+            location = "minecraft:textures/blocks/lava_still.png";
+        } else
+        {
+            LogHelper.info("Neither water nor lava... Not sure what to do!");
+        }
+
+        return new ResourceLocation(location);
     }
 }

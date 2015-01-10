@@ -1,13 +1,13 @@
 package com.falconerd.staticcontinuance.proxy;
 
-import com.falconerd.staticcontinuance.pipes.TileEntityPipe;
-import com.falconerd.staticcontinuance.pipes.TileEntityRenderPipe;
+import com.falconerd.staticcontinuance.machine.tank.RenderTank;
+import com.falconerd.staticcontinuance.machine.tank.TileEntityTank;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 
 public class ClientProxy extends CommonProxy
 {
     public static void registerProxies()
     {
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityPipe.class, new TileEntityRenderPipe());
+        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityTank.class, new RenderTank());
     }
 }
