@@ -1,12 +1,14 @@
 package com.falconerd.staticcontinuance.pipes;
 
 import com.falconerd.staticcontinuance.block.BlockContainerSC;
+import com.falconerd.staticcontinuance.utility.LogHelper;
 import com.falconerd.staticcontinuance.utility.TransportHelper;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
@@ -43,14 +45,47 @@ public class BlockPipe extends BlockContainerSC
     @Override
     public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
     {
-        TileEntity tileEntity = worldIn.getTileEntity(pos);
-        if (tileEntity != null)
-            if (tileEntity instanceof TileEntityPipe)
+        if (!worldIn.isRemote)
+        {
+            TileEntityPipe pipe = (TileEntityPipe) worldIn.getTileEntity(pos);
+            if (pipe != null)
             {
-                TileEntityPipe tileEntityPipe = (TileEntityPipe) tileEntity;
-                tileEntityPipe.updateConnections(true);
-                if (!worldIn.isRemote) TransportHelper.updateNetwork(tileEntityPipe);
+                pipe.updateConnections(false);
+                TransportHelper.updateNetworkMap(pipe);
             }
+        }
+    }
+
+    @Override
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
+    {
+        if (!worldIn.isRemote)
+        {
+            TileEntityPipe tileEntityPipe = (TileEntityPipe) worldIn.getTileEntity(pos);
+
+            LogHelper.info(tileEntityPipe.pipeConnections);
+        }
+        return true;
+    }
+
+    @Override
+    public void onBlockDestroyedByPlayer(World worldIn, BlockPos pos, IBlockState state)
+    {
+        if (!worldIn.isRemote)
+        {
+            for (EnumFacing side : EnumFacing.values())
+            {
+                TileEntity tileEntity = worldIn.getTileEntity(pos.offset(side));
+
+                if (tileEntity != null)
+                {
+                    if (tileEntity instanceof TileEntityPipe)
+                    {
+                        ((TileEntityPipe) tileEntity).updateConnections(true);
+                    }
+                }
+            }
+        }
     }
 
     @Override

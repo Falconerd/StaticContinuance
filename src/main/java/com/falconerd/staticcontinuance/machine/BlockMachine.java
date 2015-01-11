@@ -1,9 +1,6 @@
 package com.falconerd.staticcontinuance.machine;
 
 import com.falconerd.staticcontinuance.block.BlockContainerSC;
-import com.falconerd.staticcontinuance.machine.tank.TileEntityTank;
-import com.falconerd.staticcontinuance.utility.LogHelper;
-import com.falconerd.staticcontinuance.utility.TransportHelper;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
@@ -24,16 +21,6 @@ public abstract class BlockMachine extends BlockContainerSC
     @Override
     public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
     {
-        TileEntity tileEntity = worldIn.getTileEntity(pos);
-        if (tileEntity != null)
-        {
-            if (tileEntity instanceof TileEntityFluidMachine)
-            {
-                TileEntityFluidMachine tileEntityFluidMachine = (TileEntityFluidMachine) tileEntity;
-                tileEntityFluidMachine.updateNetwork();
-                if (!worldIn.isRemote) TransportHelper.updateNetwork(tileEntityFluidMachine);
-            }
-        }
     }
 
     @Override
@@ -44,7 +31,7 @@ public abstract class BlockMachine extends BlockContainerSC
             TileEntity te = worldIn.getTileEntity(pos);
             if (te instanceof TileEntityFluidMachine)
             {
-                LogHelper.info("This fuid machine's map : " + ((TileEntityFluidMachine) te).networkedFluidMachines);
+                //LogHelper.info("This fuid machine's map : " + ((TileEntityFluidMachine) te).networkedFluidMachines);
             }
             wrenchInteraction(playerIn, worldIn, pos);
             return true;
@@ -64,11 +51,11 @@ public abstract class BlockMachine extends BlockContainerSC
             {
                 if (tileEntityMachine != null)
                 {
-                    if (tileEntityMachine instanceof TileEntityTank)
+                    if (tileEntityMachine instanceof TileEntityFluidMachine)
                     {
-                        TileEntityTank tileEntityTank = (TileEntityTank) tileEntityMachine;
+                        TileEntityFluidMachine fluidMachine = (TileEntityFluidMachine) tileEntityMachine;
 
-                        tileEntityTank.switchMode();
+                        fluidMachine.switchMode();
                     }
                 }
             }

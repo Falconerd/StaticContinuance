@@ -44,7 +44,9 @@ public class BlockTank extends BlockFluidMachine
     public int getLightValue(IBlockAccess world, BlockPos pos)
     {
         TileEntityTank tank = (TileEntityTank) world.getTileEntity(pos);
-        return tank != null ? tank.getFluidLightLevel() : 0;
+        return 0;
+        // TODO: fix this
+        //return tank != null ? tank.getFluidLightLevel() : 0;
     }
 
     @Override

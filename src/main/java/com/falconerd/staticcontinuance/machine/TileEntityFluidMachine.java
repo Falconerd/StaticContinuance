@@ -1,13 +1,9 @@
 package com.falconerd.staticcontinuance.machine;
 
+import com.falconerd.staticcontinuance.handler.ConfigurationHandler;
 import com.falconerd.staticcontinuance.machine.tank.FluidTankSC;
-import com.falconerd.staticcontinuance.pipes.TileEntityPipe;
 import com.falconerd.staticcontinuance.reference.Reference;
-import com.falconerd.staticcontinuance.utility.PacketHelper;
-import net.minecraft.client.Minecraft;
 import net.minecraft.server.gui.IUpdatePlayerListBox;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
@@ -19,111 +15,130 @@ import java.util.TreeMap;
 public class TileEntityFluidMachine extends TileEntityMachine implements IFluidHandler, IUpdatePlayerListBox
 {
     /**
-     * Map of machines which are on the same network as this one, with an integer representing their distance and hence
-     * priority. We only want to update this when the network is changed in some way.
+     * This map holds a list of all machines in the network and their relative priority to this machine
      */
-    public TreeMap<Integer, TileEntityFluidMachine> networkedFluidMachines = new TreeMap<Integer, TileEntityFluidMachine>();
-    public int mode = 0;
+    public TreeMap<Integer, TileEntityFluidMachine> networkedMachines = new TreeMap<Integer, TileEntityFluidMachine>();
+
+    /**
+     * Mode which this machine is set to. For now we'll just have in/out/disabled.
+     */
+    public int mode = Reference.MACHINE_MODE_IN;
+
+    /**
+     * The tank allocated to this machine.
+     */
     public FluidTankSC tank = new FluidTankSC(16000);
+
+    /**
+     * If this is set to true, the block at this position will be marked for update
+     */
     public boolean needsUpdate = false;
+
     /**
-     * The amount of ticks in between each update. 20 ticks = ~1 second dependant on lag
+     * The update rate for the fluid network is by default 20. This means the game will wait 20 ticks before updating
+     * again.
      */
-    private int updateRate = 20;
+    private int updateRate = ConfigurationHandler.fluidNetworkTickRate;
+
     /**
-     * The timer which keeps track of the updates
+     * The update timer. When this hits {@link updateRate}, the tile entity will fire {@link doUpdate}.
      */
-    private int updateTimer = updateRate;
+    private int updateTimer = 0;
 
     public void switchMode()
     {
         this.mode++;
-        if (this.mode > Reference.TANK_MODES.length - 1) this.mode = 0;
-        Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("Mode switched to: " + Reference.TANK_MODES[this.mode]));
-        PacketHelper.setTankMode(this, this.mode);
+        if (this.mode > Reference.MACHINE_MODE_COUNT) this.mode = 0;
     }
 
+    /**
+     * Setter for this.mode
+     *
+     * @param mode The mode to set to. Represented by an integer
+     */
     public void setMode(int mode)
     {
         this.mode = mode;
     }
 
-    @Override
-    public int fill(EnumFacing from, FluidStack resource, boolean doFill)
+    /**
+     * This method is called when {@link needsUpdate} is true.
+     * <s>This method is called every {@link updateRate} ticks. Put most if not all logic in here.</s>
+     */
+    void doUpdate()
     {
-        this.needsUpdate = true;
-        return this.tank.fill(resource, doFill);
-    }
-
-    @Override
-    public FluidStack drain(EnumFacing from, FluidStack resource, boolean doDrain)
-    {
-        return this.tank.drain(resource.amount, doDrain);
-    }
-
-    @Override
-    public FluidStack drain(EnumFacing from, int maxDrain, boolean doDrain)
-    {
-        this.needsUpdate = true;
-        return this.tank.drain(maxDrain, doDrain);
-    }
-
-    @Override
-    public boolean canFill(EnumFacing from, Fluid fluid)
-    {
-        // TODO: Make this check fluid type
-        return this.mode == 0;
-    }
-
-    @Override
-    public boolean canDrain(EnumFacing from, Fluid fluid)
-    {
-        return this.mode == 1;
-    }
-
-    @Override
-    public FluidTankInfo[] getTankInfo(EnumFacing from)
-    {
-        return new FluidTankInfo[]{this.tank.getInfo()};
     }
 
     /**
-     * This method is called every tick. Use doUpdate()
+     * This method is called every tick. It checks if this tile entity needs to be updated. if so, it will call
+     * doUpdate().
      */
     @Override
     public void update()
     {
         if (needsUpdate)
         {
+            doUpdate();
             worldObj.markBlockForUpdate(pos);
             needsUpdate = false;
         }
-        if (updateTimer == 0)
-        {
-            updateTimer = updateRate;
-        } else
-        {
-            --updateTimer;
-            if (updateTimer == 0)
-            {
-                doUpdate();
-            }
-        }
+//        if (updateTimer == updateRate)
+//        {
+//            updateTimer = 0;
+//        }
+//        else
+//        {
+//            updateTimer++;
+//            if (updateTimer == updateRate)
+//            {
+//                doUpdate();
+//            }
+//        }
     }
 
-    public void doUpdate()
+    /**
+     * This method gets the fluid ratio of the tank. Useful for GUI and rendering fluids.
+     *
+     * @return The ratio
+     */
+    public double getFluidRatio()
     {
+        return (double) tank.getFluidAmount() / (double) tank.getCapacity();
     }
 
-    public void updateNetwork()
+    @Override
+    public int fill(EnumFacing from, FluidStack resource, boolean doFill)
     {
-        for (EnumFacing side : EnumFacing.values())
-        {
-            TileEntity tileEntity = worldObj.getTileEntity(pos.offset(side));
-            if (tileEntity instanceof TileEntityPipe)
-            {
-                ((TileEntityPipe) tileEntity).updateConnections(true);
-            }
-        }
+        return 0;
+    }
+
+    @Override
+    public FluidStack drain(EnumFacing from, FluidStack resource, boolean doDrain)
+    {
+        return null;
+    }
+
+    @Override
+    public FluidStack drain(EnumFacing from, int maxDrain, boolean doDrain)
+    {
+        return null;
+    }
+
+    @Override
+    public boolean canFill(EnumFacing from, Fluid fluid)
+    {
+        return false;
+    }
+
+    @Override
+    public boolean canDrain(EnumFacing from, Fluid fluid)
+    {
+        return false;
+    }
+
+    @Override
+    public FluidTankInfo[] getTankInfo(EnumFacing from)
+    {
+        return new FluidTankInfo[0];
     }
 }

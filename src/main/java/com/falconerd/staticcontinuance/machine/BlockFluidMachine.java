@@ -2,8 +2,11 @@ package com.falconerd.staticcontinuance.machine;
 
 import com.falconerd.staticcontinuance.utility.FluidHelper;
 import com.falconerd.staticcontinuance.utility.ItemHelper;
+import com.falconerd.staticcontinuance.utility.LogHelper;
+import com.falconerd.staticcontinuance.utility.TransportHelper;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -21,6 +24,15 @@ public abstract class BlockFluidMachine extends BlockMachine
     }
 
     @Override
+    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
+    {
+        if (!worldIn.isRemote)
+        {
+            TransportHelper.updateNetworkMap(worldIn.getTileEntity(pos));
+        }
+    }
+
+    @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
     {
         TileEntity te = worldIn.getTileEntity(pos);
@@ -30,8 +42,7 @@ public abstract class BlockFluidMachine extends BlockMachine
         }
         TileEntityFluidMachine fluidMachine = (TileEntityFluidMachine) te;
 
-//        fluidMachine.updateConnections(true);
-//        LogHelper.info(fluidMachine.getConnections());
+        LogHelper.info(fluidMachine.networkedMachines);
 
         ItemStack item = playerIn.inventory.getCurrentItem();
         if (item == null)
