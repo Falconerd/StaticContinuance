@@ -14,4 +14,7 @@ public class Reference
             "Out",
             "Disabled"
     };
+    public static final int MACHINE_MODE_IN = 0;
+    public static final int MACHINE_MODE_OUT = 1;
+    public static final int MACHINE_MODE_DISABLED = 2;
 }

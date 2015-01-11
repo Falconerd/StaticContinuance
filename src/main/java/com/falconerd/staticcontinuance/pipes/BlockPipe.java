@@ -1,6 +1,7 @@
 package com.falconerd.staticcontinuance.pipes;
 
 import com.falconerd.staticcontinuance.block.BlockContainerSC;
+import com.falconerd.staticcontinuance.utility.TransportHelper;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockState;
@@ -31,12 +32,12 @@ public class BlockPipe extends BlockContainerSC
         super(Material.iron);
         this.setUnlocalizedName("pipe");
         this.setDefaultState(this.blockState.getBaseState()
-                .withProperty(UP, Boolean.valueOf(false))
-                .withProperty(DOWN, Boolean.valueOf(false))
-                .withProperty(NORTH, Boolean.valueOf(false))
-                .withProperty(EAST, Boolean.valueOf(false))
-                .withProperty(SOUTH, Boolean.valueOf(false))
-                .withProperty(WEST, Boolean.valueOf(false)));
+                .withProperty(UP, false)
+                .withProperty(DOWN, false)
+                .withProperty(NORTH, false)
+                .withProperty(EAST, false)
+                .withProperty(SOUTH, false)
+                .withProperty(WEST, false));
     }
 
     @Override
@@ -46,7 +47,9 @@ public class BlockPipe extends BlockContainerSC
         if (tileEntity != null)
             if (tileEntity instanceof TileEntityPipe)
             {
-                ((TileEntityPipe) tileEntity).updateConnections(true);
+                TileEntityPipe tileEntityPipe = (TileEntityPipe) tileEntity;
+                tileEntityPipe.updateConnections(true);
+                if (!worldIn.isRemote) TransportHelper.updateNetwork(tileEntityPipe);
             }
     }
 
@@ -123,12 +126,12 @@ public class BlockPipe extends BlockContainerSC
     public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
         return state
-                .withProperty(UP, Boolean.valueOf(this.canConnectTo(worldIn, pos.up())))
-                .withProperty(DOWN, Boolean.valueOf(this.canConnectTo(worldIn, pos.down())))
-                .withProperty(NORTH, Boolean.valueOf(this.canConnectTo(worldIn, pos.north())))
-                .withProperty(EAST, Boolean.valueOf(this.canConnectTo(worldIn, pos.east())))
-                .withProperty(SOUTH, Boolean.valueOf(this.canConnectTo(worldIn, pos.south())))
-                .withProperty(WEST, Boolean.valueOf(this.canConnectTo(worldIn, pos.west())));
+                .withProperty(UP, this.canConnectTo(worldIn, pos.up()))
+                .withProperty(DOWN, this.canConnectTo(worldIn, pos.down()))
+                .withProperty(NORTH, this.canConnectTo(worldIn, pos.north()))
+                .withProperty(EAST, this.canConnectTo(worldIn, pos.east()))
+                .withProperty(SOUTH, this.canConnectTo(worldIn, pos.south()))
+                .withProperty(WEST, this.canConnectTo(worldIn, pos.west()));
     }
 
     @Override

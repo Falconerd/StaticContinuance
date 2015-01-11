@@ -5,6 +5,7 @@ import com.falconerd.staticcontinuance.pipes.TileEntityPipe;
 import com.falconerd.staticcontinuance.reference.Reference;
 import com.falconerd.staticcontinuance.utility.PacketHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.server.gui.IUpdatePlayerListBox;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumFacing;
@@ -13,11 +14,26 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidHandler;
 
-public class TileEntityFluidMachine extends TileEntityMachine implements IFluidHandler
+import java.util.TreeMap;
+
+public class TileEntityFluidMachine extends TileEntityMachine implements IFluidHandler, IUpdatePlayerListBox
 {
+    /**
+     * Map of machines which are on the same network as this one, with an integer representing their distance and hence
+     * priority. We only want to update this when the network is changed in some way.
+     */
+    public TreeMap<Integer, TileEntityFluidMachine> networkedFluidMachines = new TreeMap<Integer, TileEntityFluidMachine>();
     public int mode = 0;
     public FluidTankSC tank = new FluidTankSC(16000);
     public boolean needsUpdate = false;
+    /**
+     * The amount of ticks in between each update. 20 ticks = ~1 second dependant on lag
+     */
+    private int updateRate = 20;
+    /**
+     * The timer which keeps track of the updates
+     */
+    private int updateTimer = updateRate;
 
     public void switchMode()
     {
@@ -69,6 +85,34 @@ public class TileEntityFluidMachine extends TileEntityMachine implements IFluidH
     public FluidTankInfo[] getTankInfo(EnumFacing from)
     {
         return new FluidTankInfo[]{this.tank.getInfo()};
+    }
+
+    /**
+     * This method is called every tick. Use doUpdate()
+     */
+    @Override
+    public void update()
+    {
+        if (needsUpdate)
+        {
+            worldObj.markBlockForUpdate(pos);
+            needsUpdate = false;
+        }
+        if (updateTimer == 0)
+        {
+            updateTimer = updateRate;
+        } else
+        {
+            --updateTimer;
+            if (updateTimer == 0)
+            {
+                doUpdate();
+            }
+        }
+    }
+
+    public void doUpdate()
+    {
     }
 
     public void updateNetwork()

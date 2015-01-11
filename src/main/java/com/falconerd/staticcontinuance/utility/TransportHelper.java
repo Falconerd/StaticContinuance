@@ -12,39 +12,191 @@ import java.util.*;
 
 /**
  * This class helps manage the fluid transport system in Static Continunace
+ * TODO: create methods to manage network's valid inputs and outputs so that they don't have to be searched for unless the network changes
  */
 public class TransportHelper
 {
+    public static void updateNetwork(TileEntity from)
+    {
+        if (from instanceof TileEntityPipe || from instanceof TileEntityFluidMachine)
+        {
+            // Get all of the machines in the network
+            List<TileEntityFluidMachine> machines = getAllMachinesInNetwork(from);
+
+            // Iterate through the machines and assign each their own map of the others
+            for (TileEntityFluidMachine machine : machines)
+            {
+                machine.networkedFluidMachines = getMachineMap(machine);
+            }
+        } else
+        {
+            LogHelper.warn("The TileEntity at position " + from.getPos() + " should not be trying to update a fluid network.");
+        }
+    }
+
+    private static List<TileEntityFluidMachine> getAllMachinesInNetwork(TileEntity from)
+    {
+        List<TileEntityFluidMachine> result = new ArrayList<TileEntityFluidMachine>();
+
+        HashMap<TileEntityFluidMachine, Boolean> found = new HashMap<TileEntityFluidMachine, Boolean>();
+
+        Queue<TileEntityPipe> queue = new LinkedList<TileEntityPipe>();
+
+        HashMap<TileEntityPipe, Boolean> visited = new HashMap<TileEntityPipe, Boolean>();
+
+        if (isConnectedToPipe(from))
+        {
+            for (TileEntityPipe pipe : getConnectedPipes(from))
+            {
+                queue.add(pipe);
+            }
+
+            while (!queue.isEmpty())
+            {
+                TileEntityPipe current = queue.poll();
+
+                visited.put(current, true);
+
+                //if (isConnectedToMachine(current))
+                {
+                    for (TileEntityFluidMachine machine : getConnectedMachines(current))
+                    {
+                        if (!found.containsKey(machine))
+                        {
+                            found.put(machine, true);
+                        }
+                    }
+                }
+
+                //if (isConnectedToPipe(current))
+                {
+                    for (TileEntityPipe next : getConnectedPipes(current))
+                    {
+                        if (!visited.containsKey(next))
+                        {
+                            queue.add(next);
+                        }
+                    }
+                }
+            }
+        }
+
+        for (TileEntityFluidMachine machine : found.keySet())
+        {
+            result.add(machine);
+        }
+
+        return result;
+    }
+
+    public static TreeMap<Integer, TileEntityFluidMachine> getMachineMap(TileEntityFluidMachine from)
+    {
+        TreeMap<Integer, TileEntityFluidMachine> machineMap = new TreeMap<Integer, TileEntityFluidMachine>();
+
+        // Make sure we actually have a network to traverse
+        if (isConnectedToPipe(from))
+        {
+            // Create a queue to iterate
+            Queue<TileEntityPipe> queue = new LinkedList<TileEntityPipe>();
+
+            // Keep track of places we've been
+            HashMap<TileEntityPipe, Boolean> visited = new HashMap<TileEntityPipe, Boolean>();
+
+            // Create an integer to represent distance
+            int distance = 0;
+
+            // Loop through all connected pipes
+            for (TileEntityPipe pipe : getConnectedPipes(from))
+            {
+                // Add them to the queue
+                queue.add(pipe);
+            }
+
+            while (!queue.isEmpty())
+            {
+                // Remove the first pipe and store it as current
+                TileEntityPipe current = queue.poll();
+
+                // Add the current pipe to the visited locations
+                visited.put(current, true);
+
+                // Increase the distance
+                distance++;
+
+                // Check if we are connected to a machine
+                if (isConnectedToMachine(current))
+                {
+                    for (TileEntityMachine machine : getConnectedMachines(current))
+                    {
+                        TileEntityFluidMachine fluidMachine = (TileEntityFluidMachine) machine;
+
+                        if (fluidMachine != null)
+                        {
+                            if (!machineMap.containsValue(fluidMachine))
+                            {
+                                if (fluidMachine != from)
+                                {
+                                    machineMap.put(distance, fluidMachine);
+                                }
+                            }
+                        }
+
+                    }
+                }
+
+                // Add more pipes to the queue if we are connected to some aand haven't been there
+                for (TileEntityPipe pipe : getConnectedPipes(current))
+                {
+                    if (!visited.containsKey(pipe))
+                    {
+                        queue.add(pipe);
+                    }
+                }
+            }
+        }
+
+        return machineMap;
+    }
+
+    /**
+     * This method transfers fluids from an output into a valid input on the same network
+     * @param from The {@link TileEntityFluidMachine} to transfer from
+     */
     public static void transferFluid(TileEntityFluidMachine from)
     {
-        // Find the nearest fluid acceptor which isn't empty and contains the same type of fluid as this
-        TileEntityFluidMachine to = getNearestFluidAcceptor(from);
-
-        if (to != null)
+        if (from.networkedFluidMachines.isEmpty())
         {
+            LogHelper.info("TransportHelper.transferFluid: This machine has no valid outputs on the network.");
+        } else
+        {
+            // Get the closest networked fluid acceptor which fits the criteria
+            TileEntityFluidMachine to = from.networkedFluidMachines.firstEntry().getValue();
+
+            LogHelper.info("Closest fluid machine: " + to + " | Fluid: " + to.tank.getFluid() + " | Capacity: " + to.tank.getCapacity());
+
             // Load the transfer amount from config
             int transferAmount = ConfigurationHandler.pipeFluidTransferRate * (20 / ConfigurationHandler.fluidNetworkTickRate);
 
-            // Find out how much fluid we have in to
-            int availableTo = to.tank.getCapacity();
+            // This much space left in the tank
+            int availableTo = to.tank.getCapacityRemaining();
 
-            // Find out how much fluid we have in from
-            int availableFrom = from.tank.getCapacity();
+            // This much fluid in this tank
+            int availabeFrom = from.tank.getFluidAmount();
 
-            // Find out how much liquid we can transfer
-            int requiredCapacity = transferAmount > availableFrom ? availableFrom : transferAmount;
+            // Set the transfer amount to the amount left in the tank
+            if (availabeFrom < transferAmount) transferAmount = availabeFrom;
 
-            // If we have less space than we need, transfer only the amount we can fit
-            if (availableTo < requiredCapacity)
+            FluidStack fluidStack = from.tank.drain(transferAmount, true);
+
+            if (fluidStack != null)
             {
-                requiredCapacity = availableTo;
+                LogHelper.info("FluidStack: " + fluidStack.getFluid().getUnlocalizedName() + " | " + fluidStack.amount);
+
+                to.tank.fill(fluidStack, true);
+
+                to.needsUpdate = true;
+                from.needsUpdate = true;
             }
-
-            LogHelper.info(requiredCapacity);
-
-            FluidStack fluidStack = from.tank.drain(requiredCapacity, true);
-
-            to.tank.fill(fluidStack, true);
         }
     }
 
@@ -175,9 +327,9 @@ public class TransportHelper
      * @param tileEntity The tile entity to check
      * @return returns a {@link List} of connected pipes
      */
-    public static List<TileEntityMachine> getConnectedMachines(TileEntity tileEntity)
+    public static List<TileEntityFluidMachine> getConnectedMachines(TileEntity tileEntity)
     {
-        List<TileEntityMachine> machines = new ArrayList<TileEntityMachine>();
+        List<TileEntityFluidMachine> machines = new ArrayList<TileEntityFluidMachine>();
 
         for (EnumFacing side : EnumFacing.values())
         {
@@ -187,7 +339,7 @@ public class TransportHelper
             {
                 if (te instanceof TileEntityMachine)
                 {
-                    machines.add((TileEntityMachine) te);
+                    machines.add((TileEntityFluidMachine) te);
                 }
             }
         }

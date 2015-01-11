@@ -2,6 +2,8 @@ package com.falconerd.staticcontinuance.machine;
 
 import com.falconerd.staticcontinuance.block.BlockContainerSC;
 import com.falconerd.staticcontinuance.machine.tank.TileEntityTank;
+import com.falconerd.staticcontinuance.utility.LogHelper;
+import com.falconerd.staticcontinuance.utility.TransportHelper;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
@@ -27,7 +29,9 @@ public abstract class BlockMachine extends BlockContainerSC
         {
             if (tileEntity instanceof TileEntityFluidMachine)
             {
-                ((TileEntityFluidMachine) tileEntity).updateNetwork();
+                TileEntityFluidMachine tileEntityFluidMachine = (TileEntityFluidMachine) tileEntity;
+                tileEntityFluidMachine.updateNetwork();
+                if (!worldIn.isRemote) TransportHelper.updateNetwork(tileEntityFluidMachine);
             }
         }
     }
@@ -37,6 +41,11 @@ public abstract class BlockMachine extends BlockContainerSC
     {
         if (!worldIn.isRemote)
         {
+            TileEntity te = worldIn.getTileEntity(pos);
+            if (te instanceof TileEntityFluidMachine)
+            {
+                LogHelper.info("This fuid machine's map : " + ((TileEntityFluidMachine) te).networkedFluidMachines);
+            }
             wrenchInteraction(playerIn, worldIn, pos);
             return true;
         }
