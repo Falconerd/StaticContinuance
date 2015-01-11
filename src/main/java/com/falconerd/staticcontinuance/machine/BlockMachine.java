@@ -4,10 +4,11 @@ import com.falconerd.staticcontinuance.block.BlockContainerSC;
 import com.falconerd.staticcontinuance.machine.tank.TileEntityTank;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
@@ -16,6 +17,19 @@ public abstract class BlockMachine extends BlockContainerSC
     public BlockMachine(Material material)
     {
         super(material);
+    }
+
+    @Override
+    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
+    {
+        TileEntity tileEntity = worldIn.getTileEntity(pos);
+        if (tileEntity != null)
+        {
+            if (tileEntity instanceof TileEntityFluidMachine)
+            {
+                ((TileEntityFluidMachine) tileEntity).updateNetwork();
+            }
+        }
     }
 
     @Override
@@ -46,9 +60,6 @@ public abstract class BlockMachine extends BlockContainerSC
                         TileEntityTank tileEntityTank = (TileEntityTank) tileEntityMachine;
 
                         tileEntityTank.switchMode();
-                        //String mode = Reference.MACHINE_MODES[(int) tileEntityTank.mode];
-
-                        playerIn.addChatMessage(new ChatComponentText("Mode switched to: " + tileEntityTank.mode));
                     }
                 }
             }

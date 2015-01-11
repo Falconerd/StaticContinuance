@@ -73,6 +73,10 @@ public class RenderTank extends TileEntitySpecialRenderer
         IFluidTank internalTank = tileEntityTank.tank;
         FluidStack fluidStack = internalTank.getFluid();
 
+//        LogHelper.info("RenderTank.renderTileEntityAt: FluidStack: " + (fluidStack != null ? fluidStack.getLocalizedName() : "null"));
+//        LogHelper.info("RenderTank.renderTileEntityAt: FluidAmount: " + tileEntityTank.tank.getFluidAmount());
+//        LogHelper.info("RenderTank.renderTileEntityAt: Tank: " + tileEntityTank);
+
         if (fluidStack != null)
         {
             GL11.glDisable(GL11.GL_LIGHTING);

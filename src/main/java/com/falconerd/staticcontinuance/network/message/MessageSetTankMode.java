@@ -1,6 +1,6 @@
 package com.falconerd.staticcontinuance.network.message;
 
-import com.falconerd.staticcontinuance.machine.tank.TileEntityTank;
+import com.falconerd.staticcontinuance.machine.TileEntityFluidMachine;
 import com.falconerd.staticcontinuance.utility.LogHelper;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.util.BlockPos;
@@ -20,7 +20,7 @@ public class MessageSetTankMode implements IMessage, IMessageHandler<MessageSetT
     {
     }
 
-    public MessageSetTankMode(TileEntityTank tileEntityTank, int mode)
+    public MessageSetTankMode(TileEntityFluidMachine tileEntityTank, int mode)
     {
         this.x = tileEntityTank.getPos().getX();
         this.y = tileEntityTank.getPos().getY();
@@ -49,7 +49,7 @@ public class MessageSetTankMode implements IMessage, IMessageHandler<MessageSetT
     @Override
     public IMessage onMessage(MessageSetTankMode message, MessageContext context)
     {
-        TileEntityTank tileEntity = (TileEntityTank) FMLClientHandler.instance().getClient().theWorld.getTileEntity(new BlockPos(message.x, message.y, message.z));
+        TileEntityFluidMachine tileEntity = (TileEntityFluidMachine) FMLClientHandler.instance().getClient().theWorld.getTileEntity(new BlockPos(message.x, message.y, message.z));
         if (tileEntity != null)
         {
             tileEntity.setMode(message.mode);

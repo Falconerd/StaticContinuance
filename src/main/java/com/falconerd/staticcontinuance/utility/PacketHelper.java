@@ -1,6 +1,6 @@
 package com.falconerd.staticcontinuance.utility;
 
-import com.falconerd.staticcontinuance.machine.tank.TileEntityTank;
+import com.falconerd.staticcontinuance.machine.TileEntityFluidMachine;
 import com.falconerd.staticcontinuance.network.PacketHandler;
 import com.falconerd.staticcontinuance.network.message.MessageSetTankMode;
 import com.falconerd.staticcontinuance.network.message.MessageSyncTileEntitySC;
@@ -9,7 +9,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 
 public class PacketHelper
 {
-    public static void setTankMode(TileEntityTank tank, int mode)
+    public static void setTankMode(TileEntityFluidMachine tank, int mode)
     {
         PacketHandler.INSTANCE.sendToServer(new MessageSetTankMode(tank, mode));
     }

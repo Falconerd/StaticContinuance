@@ -1,5 +1,7 @@
 package com.falconerd.staticcontinuance.utility;
 
+import com.falconerd.staticcontinuance.init.ModFluids;
+import com.falconerd.staticcontinuance.reference.Reference;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -45,7 +47,12 @@ public class FluidHelper
             location = "minecraft:textures/blocks/lava_still.png";
         } else
         {
-            LogHelper.info("Neither water nor lava... Not sure what to do!");
+            // Not sure how to get proper fluid textures, so I'll just do steam
+            if (fluidStack.getFluid().equals(ModFluids.fluidSteam))
+            {
+                location = Reference.MOD_ID + ":" + "textures/blocks/blockSteam.png";
+            }
+            //LogHelper.info("Neither water nor lava... Not sure what to do!");
         }
 
         return new ResourceLocation(location);

@@ -1,46 +1,33 @@
 package com.falconerd.staticcontinuance.machine.tank;
 
-import com.falconerd.staticcontinuance.machine.TileEntityMachine;
-import com.falconerd.staticcontinuance.pipes.IPipeInteractor;
+import com.falconerd.staticcontinuance.machine.TileEntityFluidMachine;
 import com.falconerd.staticcontinuance.utility.NetworkHelper;
-import com.falconerd.staticcontinuance.utility.PacketHelper;
+import com.falconerd.staticcontinuance.utility.TransportHelper;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.gui.IUpdatePlayerListBox;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
-import net.minecraftforge.fluids.*;
 
 import java.util.HashMap;
 
-public class TileEntityTank extends TileEntityMachine implements IFluidHandler, IPipeInteractor
+public class TileEntityTank extends TileEntityFluidMachine implements IUpdatePlayerListBox
 {
-    public int mode = 0;
-    public FluidTank tank = new FluidTank(16000);
-    private boolean needsUpdate = false;
-
-    /////////////////////////////// ^ MODE STUFF ^ /////////////////////////////////////////////////////////////////////
-    private int updateTimer = 0;
+    public int fluidTransferRatePerTick = 1000;
     // I prefer to map connections like this rather than use an array with indexes 0-5
     private HashMap<EnumFacing, Boolean> connections = new HashMap<EnumFacing, Boolean>();
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * The amount of ticks in between each update. 20 ticks = ~1 second dependant on lag
+     */
+    private int updateRate = 20;
+    /**
+     * The timer which keeps track of the updates
+     */
+    private int updateTimer = updateRate;
 
     public TileEntityTank()
     {
         // Set all of the connections to false when initialized
         NetworkHelper.populateDirections(connections, false);
-    }
-
-    public void switchMode()
-    {
-        this.mode++;
-        PacketHelper.setTankMode(this, this.mode);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public void setMode(int mode)
-    {
-        this.mode = mode;
     }
 
     public double getFluidRatio()
@@ -96,44 +83,6 @@ public class TileEntityTank extends TileEntityMachine implements IFluidHandler, 
         }
     }
 
-    @Override
-    public int fill(EnumFacing from, FluidStack resource, boolean doFill)
-    {
-        this.needsUpdate = true;
-        return this.tank.fill(resource, doFill);
-    }
-
-    @Override
-    public FluidStack drain(EnumFacing from, FluidStack resource, boolean doDrain)
-    {
-        return this.tank.drain(resource.amount, doDrain);
-    }
-
-    @Override
-    public FluidStack drain(EnumFacing from, int maxDrain, boolean doDrain)
-    {
-        this.needsUpdate = true;
-        return this.tank.drain(maxDrain, doDrain);
-    }
-
-    @Override
-    public boolean canFill(EnumFacing from, Fluid fluid)
-    {
-        return false;
-    }
-
-    @Override
-    public boolean canDrain(EnumFacing from, Fluid fluid)
-    {
-        return false;
-    }
-
-    @Override
-    public FluidTankInfo[] getTankInfo(EnumFacing from)
-    {
-        return new FluidTankInfo[]{this.tank.getInfo()};
-    }
-
     public float getAdjustedVolume()
     {
         float amount = tank.getFluidAmount();
@@ -141,29 +90,60 @@ public class TileEntityTank extends TileEntityMachine implements IFluidHandler, 
         return (amount / capacity) * .8F;
     }
 
-    public void updateEntity()
-    {
-        if (needsUpdate)
-        {
-            if (updateTimer == 0)
-            {
-                updateTimer = 10;
-            } else
-            {
-                --updateTimer;
-                if (updateTimer == 0)
-                {
-                    worldObj.markBlockForUpdate(this.getPos());
-                    needsUpdate = false;
-                }
-            }
-        }
-    }
-
     public int getFluidLightLevel()
     {
         return 0;
     }
 
+    /**
+     * This method is called every tick. Use doUpdate()
+     */
+    @Override
+    public void update()
+    {
+        if (needsUpdate)
+        {
+            worldObj.markBlockForUpdate(pos);
+            needsUpdate = false;
+        }
+        if (updateTimer == 0)
+        {
+            updateTimer = updateRate;
+        } else
+        {
+            --updateTimer;
+            if (updateTimer == 0)
+            {
+                doUpdate();
+            }
+        }
+    }
 
+    /**
+     * This method is called every updateRate ticks. It's done this way so as not to cause logic updates every tick.
+     * That could be very laggy if used incorrectly.
+     */
+    public void doUpdate()
+    {
+        // Server update
+        if (worldObj.isRemote)
+        {
+            if (this.mode == 1) this.distributeFluid();
+        }
+        // Client update
+        else
+        {
+
+        }
+    }
+
+    public void distributeFluid()
+    {
+        TransportHelper.transferFluid(this);
+    }
+
+    public int getMode()
+    {
+        return mode;
+    }
 }

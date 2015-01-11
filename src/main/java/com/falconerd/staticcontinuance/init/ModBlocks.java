@@ -4,6 +4,8 @@ import com.falconerd.staticcontinuance.block.*;
 import com.falconerd.staticcontinuance.machine.tank.BlockTank;
 import com.falconerd.staticcontinuance.pipes.BlockPipe;
 import com.falconerd.staticcontinuance.reference.Reference;
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.Item;
@@ -19,6 +21,7 @@ public class ModBlocks
     public static final BlockSC brassBlock = new BlockBrassBlock();
     public static final BlockContainerSC tank = new BlockTank();
     public static final BlockContainerSC pipe = new BlockPipe();
+    public static Block blockSteam;
 
     public static void init()
     {
@@ -29,6 +32,21 @@ public class ModBlocks
         GameRegistry.registerBlock(brassBlock, "brassBlock");
         GameRegistry.registerBlock(tank, "tank");
         GameRegistry.registerBlock(pipe, "pipe");
+
+        // FluidBlocks
+
+        if (ModFluids.fluidSteam.getBlock() == null)
+        {
+            blockSteam = new BlockSteam(ModFluids.fluidSteam, Material.water);
+            blockSteam.setUnlocalizedName("blockSteam");
+            //blockSteam.setCreativeTab(null);
+            GameRegistry.registerBlock(blockSteam, "blockSteam");
+            ModFluids.fluidSteam.setBlock(blockSteam);
+        } else
+        {
+            blockSteam = ModFluids.fluidSteam.getBlock();
+            blockSteam.setCreativeTab(null);
+        }
     }
 
     public static void registerModels()
@@ -41,5 +59,6 @@ public class ModBlocks
         Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(Item.getItemFromBlock(brassBlock), 0, new ModelResourceLocation(Reference.MOD_ID + ":" + "brassBlock", "inventory"));
         Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(Item.getItemFromBlock(tank), 0, new ModelResourceLocation(Reference.MOD_ID + ":" + "tank", "inventory"));
         Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(Item.getItemFromBlock(pipe), 0, new ModelResourceLocation(Reference.MOD_ID + ":" + "pipe", "inventory"));
+        Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(Item.getItemFromBlock(blockSteam), 0, new ModelResourceLocation(Reference.MOD_ID + ":" + "blockSteam", "inventory"));
     }
 }
