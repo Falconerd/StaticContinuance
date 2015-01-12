@@ -55,7 +55,7 @@ public abstract class BlockMachine extends BlockContainerSC
                     {
                         TileEntityFluidMachine fluidMachine = (TileEntityFluidMachine) tileEntityMachine;
 
-                        fluidMachine.switchMode();
+                        //fluidMachine.switchMode();
                     }
                 }
             }

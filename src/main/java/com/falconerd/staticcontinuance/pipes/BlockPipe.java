@@ -1,7 +1,6 @@
 package com.falconerd.staticcontinuance.pipes;
 
 import com.falconerd.staticcontinuance.block.BlockContainerSC;
-import com.falconerd.staticcontinuance.utility.LogHelper;
 import com.falconerd.staticcontinuance.utility.TransportHelper;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
@@ -43,52 +42,6 @@ public class BlockPipe extends BlockContainerSC
     }
 
     @Override
-    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
-    {
-        if (!worldIn.isRemote)
-        {
-            TileEntityPipe pipe = (TileEntityPipe) worldIn.getTileEntity(pos);
-            if (pipe != null)
-            {
-                pipe.updateConnections(false);
-                TransportHelper.updateNetworkMap(pipe);
-            }
-        }
-    }
-
-    @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
-    {
-        if (!worldIn.isRemote)
-        {
-            TileEntityPipe tileEntityPipe = (TileEntityPipe) worldIn.getTileEntity(pos);
-
-            LogHelper.info(tileEntityPipe.pipeConnections);
-        }
-        return true;
-    }
-
-    @Override
-    public void onBlockDestroyedByPlayer(World worldIn, BlockPos pos, IBlockState state)
-    {
-        if (!worldIn.isRemote)
-        {
-            for (EnumFacing side : EnumFacing.values())
-            {
-                TileEntity tileEntity = worldIn.getTileEntity(pos.offset(side));
-
-                if (tileEntity != null)
-                {
-                    if (tileEntity instanceof TileEntityPipe)
-                    {
-                        ((TileEntityPipe) tileEntity).updateConnections(true);
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
     public AxisAlignedBB getSelectedBoundingBox(World worldIn, BlockPos pos)
     {
         float bbEdge = 11 * (1 / 16F) / 2;
@@ -118,6 +71,41 @@ public class BlockPipe extends BlockContainerSC
         this.setBlockBounds(minX, minY, minZ, maxX, maxY, maxZ);
 
         return AxisAlignedBB.fromBounds(pos.getX() + this.minX, pos.getY() + this.minY, pos.getZ() + this.minZ, pos.getX() + this.maxX, pos.getY() + this.maxY, pos.getZ() + this.maxZ);
+    }
+
+    @Override
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
+    {
+        if (!worldIn.isRemote)
+        {
+            ((TileEntityPipe) worldIn.getTileEntity(pos)).updateConnections(false);
+            //((TileEntityPipe) worldIn.getTileEntity(pos)).requestUpdate();
+            TransportHelper.lagTest((TileEntityPipe) worldIn.getTileEntity(pos), worldIn);
+        }
+        return true;
+    }
+
+    @Override
+    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
+    {
+        if (!worldIn.isRemote)
+        {
+            ((TileEntityPipe) worldIn.getTileEntity(pos)).updateConnections(false);
+        }
+    }
+
+    @Override
+    public void onBlockDestroyedByPlayer(World worldIn, BlockPos pos, IBlockState state)
+    {
+        if (!worldIn.isRemote)
+        {
+            for (EnumFacing side : EnumFacing.values())
+            {
+                TileEntityPipe pipe = (TileEntityPipe) worldIn.getTileEntity(pos.offset(side));
+
+                if (pipe != null) pipe.updateConnections(true);
+            }
+        }
     }
 
     @Override

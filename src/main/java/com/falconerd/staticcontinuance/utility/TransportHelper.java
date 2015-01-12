@@ -1,9 +1,9 @@
 package com.falconerd.staticcontinuance.utility;
 
-import com.falconerd.staticcontinuance.machine.TileEntityFluidMachine;
+import com.falconerd.staticcontinuance.machine.TileEntityMachine;
 import com.falconerd.staticcontinuance.pipes.TileEntityPipe;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.world.World;
 
 import java.util.*;
 
@@ -12,180 +12,77 @@ import java.util.*;
  */
 public class TransportHelper
 {
-    /**
-     * This method updates the maps for each connected machine.
-     * @param from The tile entity which triggered the change.
-     */
-    public static void updateNetworkMap(TileEntity from)
+    public static void lagTest(TileEntityPipe from, World world)
     {
-        LogHelper.info("UPDATING NETWORK");
-
-        if (from instanceof TileEntityPipe || from instanceof TileEntityFluidMachine)
-        {
-
-            LogHelper.info("THIS IS A PIPE OR MACHINE");
-
-            HashMap<TileEntityFluidMachine, Boolean> machines = new HashMap<TileEntityFluidMachine, Boolean>();
-
-            Queue<TileEntityPipe> queue = new LinkedList<TileEntityPipe>();
-
-            HashMap<TileEntityPipe, Boolean> visited = new HashMap<TileEntityPipe, Boolean>();
-
-            for (TileEntityPipe pipe : getConnectedPipes(from))
-            {
-                queue.add(pipe);
-            }
-
-            LogHelper.info(queue);
-
-            while (!queue.isEmpty())
-            {
-                TileEntityPipe current = queue.poll();
-
-                visited.put(current, true);
-
-                for (TileEntityFluidMachine machine : getConnectedMachines(current))
-                {
-                    if (!machines.containsKey(machine))
-                    {
-                        machines.put(machine, true);
-                    }
-                }
-
-                LogHelper.info(current.getPos() + " : " + getConnectedPipes(current));
-
-                for (TileEntityPipe pipe : getConnectedPipes(current))
-                {
-                    if (!visited.containsKey(pipe))
-                    {
-                        queue.add(pipe);
-                    }
-                }
-            }
-
-
-            for (TileEntityFluidMachine machine : machines.keySet())
-            {
-                machine.networkedMachines = getMachineMap(machine);
-            }
-        } else
-        {
-            LogHelper.warn("The TileEntity at position " + from.getPos() + " shoud not be trying to update the fluid network.");
-        }
-    }
-
-    public static TreeMap<Integer, TileEntityFluidMachine> getMachineMap(TileEntityFluidMachine from)
-    {
-        LogHelper.info("Getting machine map");
-
-        TreeMap<Integer, TileEntityFluidMachine> machines = new TreeMap<Integer, TileEntityFluidMachine>();
-
+        Set<TileEntityMachine> machines = new HashSet<TileEntityMachine>();
         Queue<TileEntityPipe> queue = new LinkedList<TileEntityPipe>();
+        Set<TileEntityPipe> visited = new HashSet<TileEntityPipe>();
 
-        HashMap<TileEntityPipe, Boolean> visited = new HashMap<TileEntityPipe, Boolean>();
+        long timeStart = System.nanoTime();
+        int count = 0;
 
-        HashMap<TileEntityFluidMachine, Boolean> visitedMachines = new HashMap<TileEntityFluidMachine, Boolean>();
-
-        int distance = 0;
-
-        for (TileEntityPipe pipe : getConnectedPipes(from))
-        {
-            queue.add(pipe);
-        }
+        queue.add(from);
 
         while (!queue.isEmpty())
         {
             TileEntityPipe current = queue.poll();
 
-            visited.put(current, true);
-
-            distance++;
-
-            for (TileEntityFluidMachine machine : getConnectedMachines(current))
+            if (!visited.contains(current))
             {
-                if (!visitedMachines.containsKey(machine))
+                visited.add(current);
+
+                for (EnumFacing side : current.machineConnections.keySet())
                 {
-                    visitedMachines.put(machine, true);
-                    if (machine != from)
+                    count++;
+
+                    TileEntityMachine machine = (TileEntityMachine) world.getTileEntity(current.getPos().offset(side));
+
+                    if (machine != null)
                     {
-                        machines.put(distance, machine);
+                        if (!machines.contains(machine))
+                        {
+                            machines.add(machine);
+                        }
+                    }
+                }
+
+                for (EnumFacing side : current.pipeConnections.keySet())
+                {
+                    count++;
+
+                    TileEntityPipe next = (TileEntityPipe) world.getTileEntity(current.getPos().offset(side));
+
+                    if (next != null)
+                    {
+                        if (!visited.contains(next))
+                        {
+                            queue.add(next);
+                        }
                     }
                 }
             }
-
-            for (TileEntityPipe pipe : getConnectedPipes(current))
-            {
-                if (!visited.containsKey(pipe))
-                {
-                    queue.add(pipe);
-                }
-            }
         }
 
-        LogHelper.info("Visited this many pipes: " + visited.size());
+        long timeEnd = System.nanoTime();
+        long timeTaken = timeEnd - timeStart;
 
-        return machines;
+        LogHelper.info("Machines: " + machines.size() + " | Pipes: " + visited.size() + "  | Calculations: " + count + " | Time: " + timeTaken + " nanoseconds");
+
     }
 
-    /**
-     * This method returns a list of connected machines.
-     *
-     * @param from Pipe which the machines are connected to.
-     * @return A list of machines. Will be empty if none are found.
-     */
-    public static List<TileEntityFluidMachine> getConnectedMachines(TileEntityPipe from)
-    {
-        List<TileEntityFluidMachine> machines = new ArrayList<TileEntityFluidMachine>();
-
-        for (EnumFacing side : EnumFacing.values())
-        {
-            TileEntity pipe = from.getWorld().getTileEntity(from.getPos().offset(side));
-
-            if (pipe != null)
-            {
-                if (pipe instanceof TileEntityFluidMachine)
-                {
-                    machines.add((TileEntityFluidMachine) pipe);
-                }
-            }
-        }
-
-        return machines;
-    }
-
-    /**
-     * This method returns a list of connected pipes.
-     * @param from What the pipes are connected to.
-     * @return A list of pipes. Will be empty if none are found.
-     */
-    public static List<TileEntityPipe> getConnectedPipes(TileEntity from)
+    public static List<TileEntityPipe> getConnectedPipes(TileEntityPipe from)
     {
         List<TileEntityPipe> pipes = new ArrayList<TileEntityPipe>();
 
-        if (from instanceof TileEntityPipe)
+        for (EnumFacing side : from.pipeConnections.keySet())
         {
-            TileEntityPipe pipe = (TileEntityPipe) from;
-
-            for (EnumFacing side : EnumFacing.values())
+            if (from.pipeConnections.get(side) != null)
             {
-                if (pipe.pipeConnections.get(side))
-                {
-                    pipes.add((TileEntityPipe) pipe.getWorld().getTileEntity(pipe.getPos().offset(side)));
-                }
-            }
-        } else if (from instanceof TileEntityFluidMachine)
-        {
-            for (EnumFacing side : EnumFacing.values())
-            {
-                TileEntity pipe = from.getWorld().getTileEntity(from.getPos().offset(side));
-
-                if (pipe instanceof TileEntityPipe)
-                {
-                    pipes.add((TileEntityPipe) pipe);
-                }
+                pipes.add((TileEntityPipe) from.getWorld().getTileEntity(from.getPos().offset(side)));
             }
         }
 
         return pipes;
     }
+
 }

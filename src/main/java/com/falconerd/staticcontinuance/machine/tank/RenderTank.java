@@ -11,7 +11,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.IFluidTank;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
@@ -70,8 +69,9 @@ public class RenderTank extends TileEntitySpecialRenderer
 
         RenderHelper.renderCube(posX, posY, posZ, posX + 1, posY + 1, posZ + 1, new BlockTank(), null);
 
-        IFluidTank internalTank = tileEntityTank.tank;
-        FluidStack fluidStack = internalTank.getFluid();
+        //TODO:IFluidTank internalTank = tileEntityTank.tank;
+        //TODO:FluidStack fluidStack = internalTank.getFluid();
+        FluidStack fluidStack = null;
 
 //        LogHelper.info("RenderTank.renderTileEntityAt: FluidStack: " + (fluidStack != null ? fluidStack.getLocalizedName() : "null"));
 //        LogHelper.info("RenderTank.renderTileEntityAt: FluidAmount: " + tileEntityTank.tank.getFluidAmount());

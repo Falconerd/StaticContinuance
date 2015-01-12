@@ -52,7 +52,7 @@ public class MessageSetTankMode implements IMessage, IMessageHandler<MessageSetT
         TileEntityFluidMachine tileEntity = (TileEntityFluidMachine) FMLClientHandler.instance().getClient().theWorld.getTileEntity(new BlockPos(message.x, message.y, message.z));
         if (tileEntity != null)
         {
-            tileEntity.setMode(message.mode);
+            //TODO:tileEntity.setMode(message.mode);
             LogHelper.info("MessageSetTankMode.onMessage: Setting mode on tank at coords" + tileEntity.getPos() + " to: " + message.mode);
         } else
         {
