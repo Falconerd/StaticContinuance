@@ -1,10 +1,7 @@
 package com.falconerd.staticcontinuance.pipes;
 
-import com.falconerd.staticcontinuance.machine.TileEntityFluidMachine;
 import com.falconerd.staticcontinuance.tileentity.TileEntitySC;
-import com.falconerd.staticcontinuance.utility.TransportHelper;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 
 import java.util.HashMap;
@@ -12,7 +9,7 @@ import java.util.HashMap;
 /**
  * Everything to do with pipes may need to be cleaned up and/or rewritten
  */
-public class TileEntityPipe extends TileEntitySC
+public class TileEntityPipe extends TileEntitySC implements IPipeInteractor
 {
     private HashMap<EnumFacing, Boolean> pipeConnections = new HashMap<EnumFacing, Boolean>();
     private HashMap<EnumFacing, Boolean> machineConnections = new HashMap<EnumFacing, Boolean>();
@@ -55,37 +52,25 @@ public class TileEntityPipe extends TileEntitySC
         }
     }
 
-    public void updateConnections(boolean once)
-    {
-        for (EnumFacing side : EnumFacing.values())
-        {
-            pipeConnections.remove(side);
-            machineConnections.remove(side);
-
-            TileEntity tileEntity = worldObj.getTileEntity(pos.offset(side));
-
-            if (tileEntity instanceof TileEntityPipe)
-            {
-                if (!once) ((TileEntityPipe) tileEntity).updateConnections(true);
-                pipeConnections.put(side, true);
-                machineConnections.remove(side);
-            } else if (tileEntity instanceof TileEntityFluidMachine)
-            {
-                if (!once) ((TileEntityFluidMachine) tileEntity).updateConnections(true);
-                machineConnections.put(side, true);
-                pipeConnections.remove(side);
-            }
-        }
-        TransportHelper.updateNetwork(pos, worldObj);
-    }
-
     public HashMap<EnumFacing, Boolean> getPipeConnections()
     {
         return pipeConnections;
     }
 
+    @Override
+    public void setPipeConnections(HashMap<EnumFacing, Boolean> pipeConnections)
+    {
+        this.pipeConnections = pipeConnections;
+    }
+
     public HashMap<EnumFacing, Boolean> getMachineConnections()
     {
         return machineConnections;
+    }
+
+    @Override
+    public void setMachineConnections(HashMap<EnumFacing, Boolean> machineConnections)
+    {
+        this.machineConnections = machineConnections;
     }
 }

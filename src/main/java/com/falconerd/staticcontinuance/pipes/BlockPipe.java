@@ -1,7 +1,6 @@
 package com.falconerd.staticcontinuance.pipes;
 
 import com.falconerd.staticcontinuance.block.BlockContainerSC;
-import com.falconerd.staticcontinuance.machine.TileEntityFluidMachine;
 import com.falconerd.staticcontinuance.utility.TransportHelper;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
@@ -77,35 +76,29 @@ public class BlockPipe extends BlockContainerSC
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        ((TileEntityPipe) worldIn.getTileEntity(pos)).updateConnections(false);
-        TransportHelper.updateNetwork(pos, worldIn);
-        return true;
+        if (!worldIn.isRemote)
+        {
+            TransportHelper.mapNode(pos, worldIn, false);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
     {
-        ((TileEntityPipe) worldIn.getTileEntity(pos)).updateConnections(false);
+        if (!worldIn.isRemote)
+        {
+            TransportHelper.mapNode(pos, worldIn, true);
+        }
     }
 
     @Override
     public void onBlockDestroyedByPlayer(World worldIn, BlockPos pos, IBlockState state)
     {
-        for (EnumFacing side : EnumFacing.values())
+        if (!worldIn.isRemote)
         {
-            TileEntity te = worldIn.getTileEntity(pos.offset(side));
-
-            if (te != null)
-            {
-                if (te instanceof TileEntityPipe)
-                {
-
-                    ((TileEntityPipe) te).updateConnections(false);
-                } else if (te instanceof TileEntityFluidMachine)
-                {
-                    ((TileEntityFluidMachine) te).updateConnections(false);
-                }
-            }
+            TransportHelper.mapNode(pos, worldIn, true);
         }
     }
 

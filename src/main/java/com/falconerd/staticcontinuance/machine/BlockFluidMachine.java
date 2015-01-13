@@ -1,6 +1,5 @@
 package com.falconerd.staticcontinuance.machine;
 
-import com.falconerd.staticcontinuance.pipes.TileEntityPipe;
 import com.falconerd.staticcontinuance.utility.FluidHelper;
 import com.falconerd.staticcontinuance.utility.ItemHelper;
 import com.falconerd.staticcontinuance.utility.LogHelper;
@@ -28,27 +27,18 @@ public abstract class BlockFluidMachine extends BlockMachine
     @Override
     public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
     {
-        ((TileEntityFluidMachine) worldIn.getTileEntity(pos)).updateConnections(false);
-        TransportHelper.updateNetwork(pos, worldIn);
+        if (!worldIn.isRemote)
+        {
+            TransportHelper.mapNode(pos, worldIn, true);
+        }
     }
 
     @Override
     public void onBlockDestroyedByPlayer(World worldIn, BlockPos pos, IBlockState state)
     {
-        for (EnumFacing side : EnumFacing.values())
+        if (!worldIn.isRemote)
         {
-            TileEntity te = worldIn.getTileEntity(pos.offset(side));
-
-            if (te != null)
-            {
-                if (te instanceof TileEntityPipe)
-                {
-                    ((TileEntityPipe) te).updateConnections(false);
-                } else if (te instanceof TileEntityFluidMachine)
-                {
-                    ((TileEntityFluidMachine) te).updateConnections(false);
-                }
-            }
+            TransportHelper.mapNode(pos, worldIn, true);
         }
     }
 
@@ -143,9 +133,10 @@ public abstract class BlockFluidMachine extends BlockMachine
                 return true;
             }
         }
-
-        wrenchInteraction(playerIn, worldIn, pos);
-
+        if (!worldIn.isRemote)
+        {
+            wrenchInteraction(playerIn, worldIn, pos);
+        }
         return false;
     }
 }

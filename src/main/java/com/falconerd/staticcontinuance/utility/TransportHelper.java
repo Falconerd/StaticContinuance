@@ -2,6 +2,7 @@ package com.falconerd.staticcontinuance.utility;
 
 import com.falconerd.staticcontinuance.handler.ConfigurationHandler;
 import com.falconerd.staticcontinuance.machine.TileEntityFluidMachine;
+import com.falconerd.staticcontinuance.pipes.IPipeInteractor;
 import com.falconerd.staticcontinuance.pipes.TileEntityPipe;
 import com.falconerd.staticcontinuance.reference.Reference;
 import net.minecraft.tileentity.TileEntity;
@@ -12,63 +13,89 @@ import net.minecraftforge.fluids.FluidStack;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
 /**
- * This class helps manage the fluid transport system in Static Continuance
+ * This class helps manage the fluid transport system in Static Continuance.
+ * I want everything to run on the server side and then send packets to the client side for updates.
  */
 public class TransportHelper
 {
-    public static void transferFluid(TileEntityFluidMachine from)
+    /**
+     * This method will find all machines on the network and remap them.
+     * @param pos
+     * @param world
+     */
+    public static void mapNetwork(BlockPos pos, World world)
     {
-        TileEntityFluidMachine to = getNearestFluidAcceptor(from);
+        long timeStart = System.nanoTime();
 
-        if (to != null)
+        Set<BlockPos> machines = findMachines(pos, world);
+
+        for (BlockPos machine : machines)
         {
-            int transferAmount = ConfigurationHandler.pipeFluidTransferRate * (20 / ConfigurationHandler.fluidNetworkTickDelay);
+            TileEntity tileEntity = world.getTileEntity(machine);
 
-            int capacity = to.getTank().getRemainingCapacity();
-            int fluidAmount = from.getTank().getFluidAmount();
-
-            int requiredCapacity = transferAmount > fluidAmount ? fluidAmount : transferAmount;
-
-            if (capacity < requiredCapacity) requiredCapacity = capacity;
-
-            FluidStack fluidStack = from.getTank().drain(requiredCapacity, true);
-            to.getTank().fill(fluidStack, true);
+            ((TileEntityFluidMachine) tileEntity).setNetworkedMachines(findMachines(machine, world));
         }
+
+        long timeEnd = System.nanoTime();
+
+        long timeTaken = timeEnd - timeStart;
+
+        LogHelper.info("Machines: " + machines.size() + " | Time: " + timeTaken + " nanoseconds");
     }
 
-    public static TileEntityFluidMachine getNearestFluidAcceptor(TileEntityFluidMachine from)
+    public static Set<BlockPos> findMachines(BlockPos pos, World world)
     {
-        Set<TileEntityFluidMachine> machines = from.getNetworkedMachinesSet();
+        Set<BlockPos> machines = new LinkedHashSet<BlockPos>();
 
-        Iterator iterator = machines.iterator();
+        Set<BlockPos> visited = new HashSet<BlockPos>();
 
-        while (iterator.hasNext())
+        Queue<BlockPos> queue = new LinkedList<BlockPos>();
+
+        for (EnumFacing side : EnumFacing.values())
         {
-            TileEntityFluidMachine machine = (TileEntityFluidMachine) iterator.next();
+            TileEntity tileEntity1 = world.getTileEntity(pos.offset(side));
 
-            if (machine != from)
+            if (tileEntity1 != null)
             {
-                if (!machine.getTank().isFull())
+                if (tileEntity1 instanceof TileEntityPipe) queue.add(tileEntity1.getPos());
+            }
+        }
+
+        while (!queue.isEmpty())
+        {
+            BlockPos current = queue.poll();
+
+            if (!visited.contains(current))
+            {
+                visited.add(current);
+
+                TileEntity currentTE = world.getTileEntity(current);
+
+                if (currentTE != null)
                 {
-                    if (machine.getMode() == Reference.MACHINE_MODE_IN)
+                    if (currentTE instanceof TileEntityPipe)
                     {
-                        if (machine.getTank().isEmpty())
+                        for (EnumFacing side : ((TileEntityPipe) currentTE).getMachineConnections().keySet())
                         {
-                            LogHelper.info("... This candidate has an empty tank ... Match found.");
-                            return machine;
-                        }
-                        if (machine.getTank().getFluid() != null)
-                        {
-                            if (machine.getTank().getFluid().isFluidEqual(from.getTank().getFluid()))
+                            if (!machines.contains(current.offset(side)))
                             {
-                                LogHelper.info("... This candidate has the same type of fluid ... Match found!");
-                                return machine;
+                                TileEntity currentConnectedTE = world.getTileEntity(current.offset(side));
+                                if (currentConnectedTE != null) machines.add(currentConnectedTE.getPos());
+                            }
+                        }
+
+                        for (EnumFacing side : ((TileEntityPipe) currentTE).getPipeConnections().keySet())
+                        {
+                            if (!visited.contains(current.offset(side)))
+                            {
+                                TileEntity currentConnectedTE = world.getTileEntity(current.offset(side));
+                                if (currentConnectedTE != null) queue.add(currentConnectedTE.getPos());
                             }
                         }
                     }
@@ -76,176 +103,99 @@ public class TransportHelper
             }
         }
 
-        LogHelper.info("TransportHelper.getNearestFluidAcceptor: We were unable to find a fluid acceptor.");
+        return machines;
+    }
+
+
+    public static void mapNode(BlockPos pos, World world, Boolean cascade)
+    {
+        TileEntity tileEntity = world.getTileEntity(pos);
+
+        HashMap<EnumFacing, Boolean> machineConnections = new HashMap<EnumFacing, Boolean>();
+        HashMap<EnumFacing, Boolean> pipeConnections = new HashMap<EnumFacing, Boolean>();
+
+        for (EnumFacing side : EnumFacing.values())
+        {
+            TileEntity tileEntity1 = world.getTileEntity(pos.offset(side));
+
+            if (tileEntity1 != null)
+            {
+                if (tileEntity1 instanceof IPipeInteractor)
+                {
+                    if (tileEntity1 instanceof TileEntityFluidMachine) machineConnections.put(side, true);
+                    if (tileEntity1 instanceof TileEntityPipe) pipeConnections.put(side, true);
+
+                    if (cascade) TransportHelper.mapNode(tileEntity1.getPos(), world, false);
+                }
+            }
+        }
+
+        if (tileEntity != null)
+        {
+            if (tileEntity instanceof TileEntityFluidMachine)
+            {
+                ((TileEntityFluidMachine) tileEntity).setMachineConnections(machineConnections);
+                ((TileEntityFluidMachine) tileEntity).setPipeConnections(pipeConnections);
+            }
+            if (tileEntity instanceof TileEntityPipe)
+            {
+                ((TileEntityPipe) tileEntity).setMachineConnections(machineConnections);
+                ((TileEntityPipe) tileEntity).setPipeConnections(pipeConnections);
+            }
+        }
+
+        mapNetwork(pos, world);
+    }
+
+    public static BlockPos getNearestFluidAcceptor(BlockPos pos, World world)
+    {
+        TileEntityFluidMachine source = (TileEntityFluidMachine) world.getTileEntity(pos);
+
+        for (BlockPos machine : source.getNetworkedMachines())
+        {
+            TileEntityFluidMachine fluidMachine = (TileEntityFluidMachine) world.getTileEntity(machine);
+
+            if (fluidMachine.getMode() == Reference.MACHINE_MODE_IN)
+            {
+                if (fluidMachine.getTank().isEmpty()) return machine;
+                if (fluidMachine.getTank().getFluid().isFluidEqual(source.getTank().getFluid()))
+                {
+                    if (fluidMachine.getTank().getRemainingCapacity() > 0)
+                    {
+                        return machine;
+                    }
+                }
+            }
+        }
 
         return null;
     }
 
-    public static void updateNetwork(BlockPos pos, World world)
+    public static void transferLiquid(BlockPos pos, World world)
     {
-        TileEntity te = world.getTileEntity(pos);
+        BlockPos destination = getNearestFluidAcceptor(pos, world);
 
-        if (te != null)
+        LogHelper.info("Nearest Acceptor is: " + destination);
+
+        if (destination != null)
         {
-            if (te instanceof TileEntityPipe || te instanceof TileEntityFluidMachine)
-            {
-                Set<BlockPos> machines = getNetworkedMachines(pos, world);
+            TileEntityFluidMachine to = (TileEntityFluidMachine) world.getTileEntity(destination);
+            TileEntityFluidMachine from = (TileEntityFluidMachine) world.getTileEntity(pos);
 
-                for (BlockPos position : machines)
-                {
-                    TileEntity machine = world.getTileEntity(position);
+            int transferAmount = ConfigurationHandler.pipeFluidTransferRate * (20 / ConfigurationHandler.fluidNetworkTickDelay);
 
-                    if (machine != null)
-                    {
-                        if (machine instanceof TileEntityFluidMachine)
-                        {
-                            ((TileEntityFluidMachine) machine).updateNetworkedMachines();
-                        }
-                    }
+            int capacity = to.getTank().getRemainingCapacity();
+            int fluidAmount = from.getTank().getFluidAmount();
 
-                }
-            }
+            int required = transferAmount > fluidAmount ? fluidAmount : transferAmount;
+
+            if (capacity < required) required = capacity;
+
+            FluidStack fluidStack = from.getTank().drain(required, true);
+            to.getTank().fill(fluidStack, true);
+
+            // Send the packet to tell the client we have moved things
+            PacketHelper.updateFluidMachines(pos, destination, required);
         }
     }
-
-    /**
-     * This method is used to scan a pipe network. It uses BFS (Breadth-first search) to find all nodes and mark them.
-     *
-     * @param pos  The starting point.
-     * @param world The Minecraft world.
-     */
-    public static Set<BlockPos> getNetworkedMachines(BlockPos pos, World world)
-    {
-        LogHelper.info("TransportHelper: Getting new list of networked machines.");
-
-        // This is the set of machines that are found
-        Set<BlockPos> machines = new HashSet<BlockPos>();
-
-        // This is the set of pipes we have already visited
-        Set<TileEntityPipe> visited = new HashSet<TileEntityPipe>();
-
-        // This is the queue of nodes to traverse
-        Queue<TileEntityPipe> queue = new LinkedList<TileEntityPipe>();
-
-        // Time starting this operation
-        long timeStart = System.nanoTime();
-
-        // Counter used for number of "calculations"
-        int count = 0;
-
-        // Get the starting point
-        TileEntity te = world.getTileEntity(pos);
-
-        // If there is a tile entity here
-        if (te != null)
-        {
-            // Get the connected pipes and add them to the queue
-            Set<TileEntityPipe> pipes = getConnectedPipes(pos, world);
-
-            // Add all the pipes to the queue
-            queue.addAll(pipes);
-        }
-
-        // While the queue is not empty
-        while (!queue.isEmpty())
-        {
-            // Remove a node from the queue and set it as the current node
-            TileEntityPipe current = queue.poll();
-
-            // If we have not already been here
-            if (!visited.contains(current))
-            {
-                // Mark this place as somewhere we have been
-                visited.add(current);
-
-                // Get the direction of machines connected to this node
-                for (EnumFacing side : current.getMachineConnections().keySet())
-                {
-                    // Increase the count
-                    count++;
-
-                    // Get the machine in the direction specified
-                    TileEntityFluidMachine machine = (TileEntityFluidMachine) world.getTileEntity(current.getPos().offset(side));
-
-                    // If we indeed have a machine here
-                    if (machine != null)
-                    {
-                        // If the machine is not already in the list of machines
-                        if (!machines.contains(machine.getPos()))
-                        {
-                            // Add the machine to the list of machines
-                            machines.add(machine.getPos());
-                        }
-                    }
-                }
-
-                // Get the direction of pipes connected to this pipe
-                for (EnumFacing side : current.getPipeConnections().keySet())
-                {
-                    // Increase the count
-                    count++;
-
-                    // Get the pipe in the direction specified
-                    TileEntityPipe pipe = (TileEntityPipe) world.getTileEntity(current.getPos().offset(side));
-
-                    // If we do have a pipe here
-                    if (pipe != null)
-                    {
-                        // If we haven't been to this node
-                        if (!visited.contains(pipe))
-                        {
-                            // Add this node to the queue
-                            queue.add(pipe);
-                        }
-                    }
-                }
-            }
-        }
-
-        // The end time for this operation
-        long timeEnd = System.nanoTime();
-
-        // The total time taken in nanoseconds
-        long timeTaken = timeEnd - timeStart;
-
-        LogHelper.info("Machines: " + machines.size() + " | Pipes: " + visited.size() + "  | Calculations: " + count + " | Time: " + timeTaken + " nanoseconds");
-
-        return machines;
-    }
-
-    public static Set<TileEntityPipe> getConnectedPipes(BlockPos pos, World world)
-    {
-        HashMap<EnumFacing, Boolean> pipeMap = new HashMap<EnumFacing, Boolean>();
-
-        Set<TileEntityPipe> pipes = new HashSet<TileEntityPipe>();
-
-        TileEntity te = world.getTileEntity(pos);
-
-        if (te != null)
-        {
-            if (te instanceof TileEntityFluidMachine)
-            {
-                pipeMap = ((TileEntityFluidMachine) te).getPipeConnections();
-            } else if (te instanceof TileEntityPipe)
-            {
-                pipeMap = ((TileEntityPipe) te).getPipeConnections();
-            }
-
-            for (EnumFacing side : pipeMap.keySet())
-            {
-                TileEntity te2 = world.getTileEntity(pos.offset(side));
-
-                if (te2 != null)
-                {
-                    if (te2 instanceof TileEntityPipe)
-                    {
-                        pipes.add((TileEntityPipe) te2);
-                    }
-                }
-            }
-        }
-
-        return pipes;
-    }
-
 }

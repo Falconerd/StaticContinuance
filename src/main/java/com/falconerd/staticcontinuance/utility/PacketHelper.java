@@ -4,7 +4,9 @@ import com.falconerd.staticcontinuance.machine.TileEntityFluidMachine;
 import com.falconerd.staticcontinuance.network.PacketHandler;
 import com.falconerd.staticcontinuance.network.message.MessageSetTankMode;
 import com.falconerd.staticcontinuance.network.message.MessageSyncTileEntitySC;
+import com.falconerd.staticcontinuance.network.message.MessageUpdateFluidMachines;
 import com.falconerd.staticcontinuance.tileentity.TileEntitySC;
+import net.minecraft.util.BlockPos;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 
 public class PacketHelper
@@ -22,5 +24,10 @@ public class PacketHelper
     public static void syncTile(TileEntitySC tileEntitySC)
     {
         syncTile(new MessageSyncTileEntitySC(tileEntitySC));
+    }
+
+    public static void updateFluidMachines(BlockPos from, BlockPos to, int amount)
+    {
+        PacketHandler.INSTANCE.sendToAll(new MessageUpdateFluidMachines(from, to, amount));
     }
 }

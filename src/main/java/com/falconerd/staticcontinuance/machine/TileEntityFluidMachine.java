@@ -2,14 +2,13 @@ package com.falconerd.staticcontinuance.machine;
 
 import com.falconerd.staticcontinuance.handler.ConfigurationHandler;
 import com.falconerd.staticcontinuance.machine.tank.TankSC;
-import com.falconerd.staticcontinuance.pipes.TileEntityPipe;
+import com.falconerd.staticcontinuance.pipes.IPipeInteractor;
 import com.falconerd.staticcontinuance.reference.Reference;
 import com.falconerd.staticcontinuance.utility.LogHelper;
 import com.falconerd.staticcontinuance.utility.TransportHelper;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.server.gui.IUpdatePlayerListBox;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.util.Constants;
@@ -22,7 +21,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-public class TileEntityFluidMachine extends TileEntityMachine implements IFluidHandler, IUpdatePlayerListBox
+public class TileEntityFluidMachine extends TileEntityMachine implements IFluidHandler, IUpdatePlayerListBox, IPipeInteractor
 {
     /**
      * This is a {@link HashMap} containing only the direction of pipes which are present. If a pipe is not present in a
@@ -67,43 +66,6 @@ public class TileEntityFluidMachine extends TileEntityMachine implements IFluidH
      * This is the timer which is used to keep track of updates.
      */
     int updateTimer = updateDelay;
-
-    /**
-     * This method will update the set of networked machines.
-     *
-     * @see #networkedMachines
-     */
-    public void updateNetworkedMachines()
-    {
-        this.setNetworkedMachines(TransportHelper.getNetworkedMachines(pos, worldObj));
-    }
-
-    /**
-     * This method will update all connections related to the fluid network
-     *
-     * @param once If this is false, adjacent entities will also call this method.
-     *             TODO: Generalise this and move it to TransportHelper
-     */
-    public void updateConnections(boolean once)
-    {
-        for (EnumFacing side : EnumFacing.values())
-        {
-            pipeConnections.remove(side);
-            machineConnections.remove(side);
-
-            TileEntity tileEntity = worldObj.getTileEntity(pos.offset(side));
-
-            if (tileEntity instanceof TileEntityPipe)
-            {
-                pipeConnections.put(side, true);
-                if (!once) ((TileEntityPipe) tileEntity).updateConnections(true);
-            } else if (tileEntity instanceof TileEntityFluidMachine)
-            {
-                machineConnections.put(side, true);
-            }
-        }
-        TransportHelper.updateNetwork(pos, worldObj);
-    }
 
     @Override
     public void writeToNBT(NBTTagCompound compound)
@@ -212,7 +174,7 @@ public class TileEntityFluidMachine extends TileEntityMachine implements IFluidH
     {
         if (needsUpdate)
         {
-            worldObj.markBlockForUpdate(pos);
+            getWorld().markBlockForUpdate(getPos());
             needsUpdate = false;
         }
         if (updateTimer == 0)
@@ -223,13 +185,9 @@ public class TileEntityFluidMachine extends TileEntityMachine implements IFluidH
             --updateTimer;
             if (updateTimer == 0)
             {
-                checkTransfer();
-
-                //TODO: Add something to make sure this doesn't run if we use other mods pipes
-                if (this.getNetworkedMachines().isEmpty() || this.getPipeConnections().isEmpty())
+                if (!getWorld().isRemote)
                 {
-                    this.updateConnections(false);
-                    this.updateNetworkedMachines();
+                    checkTransfer();
                 }
             }
         }
@@ -237,12 +195,10 @@ public class TileEntityFluidMachine extends TileEntityMachine implements IFluidH
 
     public void checkTransfer()
     {
-        if (!this.getTank().isEmpty())
+        if (!this.getNetworkedMachines().isEmpty() && this.getMode() == Reference.MACHINE_MODE_OUT && !this.getTank().isEmpty())
         {
-            if (this.getMode() == Reference.MACHINE_MODE_OUT)
-            {
-                TransportHelper.transferFluid(this);
-            }
+            LogHelper.info("Checking from list... " + this.getNetworkedMachines());
+            TransportHelper.transferLiquid(getPos(), getWorld());
         }
     }
 
@@ -256,9 +212,21 @@ public class TileEntityFluidMachine extends TileEntityMachine implements IFluidH
         return pipeConnections;
     }
 
+    @Override
+    public void setPipeConnections(HashMap<EnumFacing, Boolean> pipeConnections)
+    {
+        this.pipeConnections = pipeConnections;
+    }
+
     public HashMap<EnumFacing, Boolean> getMachineConnections()
     {
         return machineConnections;
+    }
+
+    @Override
+    public void setMachineConnections(HashMap<EnumFacing, Boolean> machineConnections)
+    {
+        this.machineConnections = machineConnections;
     }
 
     public int getMode()
@@ -303,6 +271,7 @@ public class TileEntityFluidMachine extends TileEntityMachine implements IFluidH
 
     public void setNetworkedMachines(Set<BlockPos> networkedMachines)
     {
+        if (networkedMachines.contains(this.getPos())) networkedMachines.remove(this.getPos());
         this.networkedMachines = networkedMachines;
     }
 
@@ -318,35 +287,5 @@ public class TileEntityFluidMachine extends TileEntityMachine implements IFluidH
 
         //TODO: Work out this stuff
         //PacketHelper.setFluidMachineMode(this, this.mode);
-    }
-
-    public Set<TileEntityFluidMachine> getNetworkedMachinesSet()
-    {
-        Set<TileEntityFluidMachine> machines = new LinkedHashSet<TileEntityFluidMachine>();
-
-        if (this.getNetworkedMachines().isEmpty())
-        {
-            TransportHelper.updateNetwork(pos, worldObj);
-            this.updateConnections(false);
-            this.updateNetworkedMachines();
-            LogHelper.info("getNetworkedMachinesSet: Got new list of machines... Found: " + this.getNetworkedMachines());
-        }
-
-        for (BlockPos position : this.getNetworkedMachines())
-        {
-            TileEntity te = worldObj.getTileEntity(position);
-
-            if (te != null)
-            {
-                if (te instanceof TileEntityFluidMachine)
-                {
-                    machines.add((TileEntityFluidMachine) te);
-                }
-            }
-        }
-
-        LogHelper.info("Found machines:" + this.getNetworkedMachines() + " from positions: " + machines);
-
-        return machines;
     }
 }
