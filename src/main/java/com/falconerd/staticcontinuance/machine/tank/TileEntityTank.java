@@ -7,7 +7,7 @@ public class TileEntityTank extends TileEntityFluidMachine
     // TODO: Fix this
     public double getFluidRenderHeight()
     {
-        double renderHeight = 0;//getFluidRatio();
+        double renderHeight = getFluidRatio();
         if (renderHeight <= 0.02) return 0.02;
         if (renderHeight > 0.98) return 1.0;
 

@@ -28,6 +28,11 @@ public class TankSC extends FluidTank
         return getFluid() != null ? getFluid().getFluid() : null;
     }
 
+    public int getRemainingCapacity()
+    {
+        return this.getCapacity() - this.getFluidAmount();
+    }
+
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound nbt)
     {

@@ -13,4 +13,5 @@ public class Reference
     public static final int MACHINE_MODE_OUT = 1;
     public static final int MACHINE_MODE_DISABLED = 2;
     public static final int MACHINE_MODE_COUNT = 2;
+    public static final String[] MACHINE_MODES = {"In", "Out", "Disabled"};
 }
