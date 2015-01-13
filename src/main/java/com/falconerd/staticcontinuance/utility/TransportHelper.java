@@ -103,7 +103,7 @@ public class TransportHelper
         // The total time taken in nanoseconds
         long timeTaken = timeEnd - timeStart;
 
-        LogHelper.info("Machines: " + machines.size() + " | Pipes: " + visited.size() + "  | Calculations: " + count + " | Time: " + timeTaken + " nanoseconds");
+        LogHelper.info("Machines: " + machines.size() + " | Pipes: " + visited.size() + "  | Calculations: " + count + " | Time: " + timeTaken + " nanoseconds!");
 
     }
 
