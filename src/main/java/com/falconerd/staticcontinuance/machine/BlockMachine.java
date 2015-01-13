@@ -1,12 +1,12 @@
 package com.falconerd.staticcontinuance.machine;
 
 import com.falconerd.staticcontinuance.block.BlockContainerSC;
+import com.falconerd.staticcontinuance.utility.LogHelper;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
@@ -26,21 +26,15 @@ public abstract class BlockMachine extends BlockContainerSC
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        if (!worldIn.isRemote)
-        {
-            TileEntity te = worldIn.getTileEntity(pos);
-            if (te instanceof TileEntityFluidMachine)
-            {
-                //LogHelper.info("This fuid machine's map : " + ((TileEntityFluidMachine) te).networkedFluidMachines);
-            }
-            wrenchInteraction(playerIn, worldIn, pos);
-            return true;
-        }
-        return false;
+        LogHelper.info("onBlockActivated!");
+        wrenchInteraction(playerIn, worldIn, pos);
+        return true;
     }
+
 
     public void wrenchInteraction(EntityPlayer playerIn, World worldIn, BlockPos pos)
     {
+        LogHelper.info("wrenchInteraction!");
         ItemStack itemStack = playerIn.inventory.getCurrentItem();
 
         TileEntityMachine tileEntityMachine = (TileEntityMachine) worldIn.getTileEntity(pos);
@@ -55,7 +49,7 @@ public abstract class BlockMachine extends BlockContainerSC
                     {
                         TileEntityFluidMachine fluidMachine = (TileEntityFluidMachine) tileEntityMachine;
 
-                        //fluidMachine.switchMode();
+                        fluidMachine.switchMode();
                     }
                 }
             }

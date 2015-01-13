@@ -2,6 +2,7 @@ package com.falconerd.staticcontinuance.utility;
 
 import com.falconerd.staticcontinuance.machine.TileEntityFluidMachine;
 import com.falconerd.staticcontinuance.network.PacketHandler;
+import com.falconerd.staticcontinuance.network.message.MessageSetFluidMachineMode;
 import com.falconerd.staticcontinuance.network.message.MessageSetTankMode;
 import com.falconerd.staticcontinuance.network.message.MessageSyncTileEntitySC;
 import com.falconerd.staticcontinuance.tileentity.TileEntitySC;
@@ -22,5 +23,10 @@ public class PacketHelper
     public static void syncTile(TileEntitySC tileEntitySC)
     {
         syncTile(new MessageSyncTileEntitySC(tileEntitySC));
+    }
+
+    public static void setFluidMachineMode(TileEntityFluidMachine tileEntityFluidMachine, int mode)
+    {
+        PacketHandler.INSTANCE.sendToServer(new MessageSetFluidMachineMode(tileEntityFluidMachine, mode));
     }
 }

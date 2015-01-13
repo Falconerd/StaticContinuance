@@ -21,61 +21,14 @@ public class RenderTank extends TileEntitySpecialRenderer
     @Override
     public void renderTileEntityAt(TileEntity tileEntity, double posX, double posY, double posZ, float f, int i)
     {
-//        TileEntityTank tileEntityTank = (TileEntityTank) tileEntity;
-//        IFluidTank internalTank = tileEntityTank.tank;
-//        FluidStack fluidStack = internalTank.getFluid();
-//
-//        GL11.glPushMatrix();
-//        {
-//            RenderHelper.renderCube(posX, posY, posZ, posX + 1, posY + 1, posZ + 1, new BlockTank(), "tank");
-//
-//            if (fluidStack != null)
-//            {
-//                GL11.glTranslated(posX, posY, posZ);
-//                GL11.glDisable(GL11.GL_LIGHTING);
-//
-//                bindTexture(FluidHelper.getFluidResourceLocation(fluidStack));
-//
-//                Tessellator tessellator = Tessellator.getInstance();
-//                WorldRenderer worldRenderer = tessellator.getWorldRenderer();
-//
-//                double fluidMin = .0625;
-//                double fluidMax = .9375;
-//
-//                worldRenderer.startDrawingQuads();
-//
-//                {
-//                    worldRenderer.addVertexWithUV(fluidMin, fluidMin, fluidMin, fluidMin, fluidMin);
-//                    worldRenderer.addVertexWithUV(fluidMin, fluidMax, fluidMin, fluidMin, fluidMax);
-//                    worldRenderer.addVertexWithUV(fluidMax, fluidMax, fluidMin, fluidMax, fluidMax);
-//                    worldRenderer.addVertexWithUV(fluidMax, fluidMin, fluidMin, fluidMax, fluidMin);
-//
-//                    //                worldRenderer.addVertexWithUV(0, 0, 0, 0, 0);
-//                    //                worldRenderer.addVertexWithUV(1, 0, 0, 1, 0);
-//                    //                worldRenderer.addVertexWithUV(1, 1, 0, 1, 1);
-//                    //                worldRenderer.addVertexWithUV(0, 1, 0, 0, 1);
-//                }
-//
-//                tessellator.draw();
-//
-//                GL11.glEnable(GL11.GL_LIGHTING);
-//            }
-//        }
-//        GL11.glPopMatrix();
-
         bindTexture(new ResourceLocation(Reference.MOD_ID + ":" + "textures/blocks/tank.png"));
         TileEntityTank tileEntityTank = (TileEntityTank) tileEntity;
         GL11.glPushMatrix();
 
         RenderHelper.renderCube(posX, posY, posZ, posX + 1, posY + 1, posZ + 1, new BlockTank(), null);
 
-        //TODO:IFluidTank internalTank = tileEntityTank.tank;
-        //TODO:FluidStack fluidStack = internalTank.getFluid();
-        FluidStack fluidStack = null;
-
-//        LogHelper.info("RenderTank.renderTileEntityAt: FluidStack: " + (fluidStack != null ? fluidStack.getLocalizedName() : "null"));
-//        LogHelper.info("RenderTank.renderTileEntityAt: FluidAmount: " + tileEntityTank.tank.getFluidAmount());
-//        LogHelper.info("RenderTank.renderTileEntityAt: Tank: " + tileEntityTank);
+        TankSC internalTank = tileEntityTank.getTank();
+        FluidStack fluidStack = internalTank.getFluid();
 
         if (fluidStack != null)
         {
@@ -86,16 +39,13 @@ public class RenderTank extends TileEntitySpecialRenderer
             Fluid fluid = fluidStack.getFluid();
 
             ResourceLocation fluidTexture = FluidHelper.getFluidResourceLocation(fluidStack);
-            final int color;
 
             if (fluidTexture != null)
             {
                 bindTexture(fluidTexture);
-                color = fluid.getColor(fluidStack);
             } else
             {
                 LogHelper.info("Cannot find fluidTexture");
-                color = fluid.getColor(fluidStack);
             }
 
             Tessellator tessellator = Tessellator.getInstance();

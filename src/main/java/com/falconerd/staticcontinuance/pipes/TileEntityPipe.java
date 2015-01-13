@@ -13,8 +13,8 @@ import java.util.HashMap;
  */
 public class TileEntityPipe extends TileEntitySC
 {
-    public HashMap<EnumFacing, Boolean> pipeConnections = new HashMap<EnumFacing, Boolean>();
-    public HashMap<EnumFacing, Boolean> machineConnections = new HashMap<EnumFacing, Boolean>();
+    private HashMap<EnumFacing, Boolean> pipeConnections = new HashMap<EnumFacing, Boolean>();
+    private HashMap<EnumFacing, Boolean> machineConnections = new HashMap<EnumFacing, Boolean>();
 
     @Override
     public void writeToNBT(NBTTagCompound compound)
@@ -24,6 +24,11 @@ public class TileEntityPipe extends TileEntitySC
         for (EnumFacing side : pipeConnections.keySet())
         {
             compound.setBoolean("pipe" + side.getName2(), true);
+        }
+
+        for (EnumFacing side : machineConnections.keySet())
+        {
+            compound.setBoolean("machine" + side.getName2(), true);
         }
     }
 
@@ -39,6 +44,14 @@ public class TileEntityPipe extends TileEntitySC
                 this.pipeConnections.put(side, true);
             }
         }
+
+        for (EnumFacing side : EnumFacing.values())
+        {
+            if (compound.getBoolean("pipe" + side.getName2()))
+            {
+                this.machineConnections.put(side, true);
+            }
+        }
     }
 
     public void updateConnections(boolean once)
@@ -49,11 +62,14 @@ public class TileEntityPipe extends TileEntitySC
 
             if (tileEntity instanceof TileEntityPipe)
             {
-                pipeConnections.put(side, true);
                 if (!once) ((TileEntityPipe) tileEntity).updateConnections(true);
+                pipeConnections.put(side, true);
+                machineConnections.remove(side);
             } else if (tileEntity instanceof TileEntityFluidMachine)
             {
+                if (!once) ((TileEntityFluidMachine) tileEntity).updateConnections(true);
                 machineConnections.put(side, true);
+                pipeConnections.remove(side);
             } else
             {
                 pipeConnections.remove(side);
@@ -62,4 +78,13 @@ public class TileEntityPipe extends TileEntitySC
         }
     }
 
+    public HashMap<EnumFacing, Boolean> getPipeConnections()
+    {
+        return pipeConnections;
+    }
+
+    public HashMap<EnumFacing, Boolean> getMachineConnections()
+    {
+        return machineConnections;
+    }
 }

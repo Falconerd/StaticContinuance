@@ -1,6 +1,7 @@
 package com.falconerd.staticcontinuance.pipes;
 
 import com.falconerd.staticcontinuance.block.BlockContainerSC;
+import com.falconerd.staticcontinuance.machine.TileEntityFluidMachine;
 import com.falconerd.staticcontinuance.utility.TransportHelper;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
@@ -76,36 +77,45 @@ public class BlockPipe extends BlockContainerSC
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        if (!worldIn.isRemote)
-        {
+        //if (!worldIn.isRemote)
+        //{
             ((TileEntityPipe) worldIn.getTileEntity(pos)).updateConnections(false);
-            //((TileEntityPipe) worldIn.getTileEntity(pos)).requestUpdate();
-            TransportHelper.lagTest((TileEntityPipe) worldIn.getTileEntity(pos), worldIn);
-        }
+        TransportHelper.updateNetwork(pos, worldIn);
+        //}
         return true;
     }
 
     @Override
     public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
     {
-        if (!worldIn.isRemote)
-        {
+        //if (!worldIn.isRemote)
+        //{
             ((TileEntityPipe) worldIn.getTileEntity(pos)).updateConnections(false);
-        }
+        //}
     }
 
     @Override
     public void onBlockDestroyedByPlayer(World worldIn, BlockPos pos, IBlockState state)
     {
-        if (!worldIn.isRemote)
-        {
+        //if (!worldIn.isRemote)
+        //{
             for (EnumFacing side : EnumFacing.values())
             {
-                TileEntityPipe pipe = (TileEntityPipe) worldIn.getTileEntity(pos.offset(side));
+                TileEntity te = worldIn.getTileEntity(pos.offset(side));
 
-                if (pipe != null) pipe.updateConnections(true);
+                if (te != null)
+                {
+                    if (te instanceof TileEntityPipe)
+                    {
+
+                        ((TileEntityPipe) te).updateConnections(true);
+                    } else if (te instanceof TileEntityFluidMachine)
+                    {
+                        ((TileEntityFluidMachine) te).updateConnections(true);
+                    }
+                }
             }
-        }
+        //}
     }
 
     @Override
