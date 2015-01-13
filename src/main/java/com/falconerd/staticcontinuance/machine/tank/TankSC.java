@@ -58,9 +58,4 @@ public class TankSC extends FluidTank
     public void readTankFromNBT(NBTTagCompound nbt)
     {
     }
-
-    public int getRemainingCapacity()
-    {
-        return this.getCapacity() - this.getFluidAmount();
-    }
 }
