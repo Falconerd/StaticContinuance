@@ -18,6 +18,11 @@ public class BlockSC extends Block
         this(Material.rock);
     }
 
+    protected void init()
+    {
+
+    }
+
     @Override
     public String getUnlocalizedName()
     {

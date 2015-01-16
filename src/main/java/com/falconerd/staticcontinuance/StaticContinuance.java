@@ -1,7 +1,13 @@
 package com.falconerd.staticcontinuance;
 
 import com.falconerd.staticcontinuance.handler.ConfigurationHandler;
-import com.falconerd.staticcontinuance.init.*;
+import com.falconerd.staticcontinuance.handler.GuiHandler;
+import com.falconerd.staticcontinuance.init.ModBlocks;
+import com.falconerd.staticcontinuance.init.ModFluids;
+import com.falconerd.staticcontinuance.init.ModItems;
+import com.falconerd.staticcontinuance.init.ModTileEntities;
+import com.falconerd.staticcontinuance.init.OreDictionaried;
+import com.falconerd.staticcontinuance.init.Recipes;
 import com.falconerd.staticcontinuance.network.PacketHandler;
 import com.falconerd.staticcontinuance.proxy.ClientProxy;
 import com.falconerd.staticcontinuance.proxy.IProxy;
@@ -26,6 +32,8 @@ public class StaticContinuance
 
     public static SimpleNetworkWrapper simpleNetworkWrapper;
 
+    public static GuiHandler guiHandler = new GuiHandler();
+
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event)
     {
@@ -44,6 +52,8 @@ public class StaticContinuance
     @Mod.EventHandler
     public void init(FMLInitializationEvent event)
     {
+        NetworkRegistry.INSTANCE.registerGuiHandler(this, guiHandler);
+
         ModTileEntities.init();
         ModItems.registerModels();
         ModBlocks.registerModels();

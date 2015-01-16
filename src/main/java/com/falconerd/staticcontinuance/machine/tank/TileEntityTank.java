@@ -4,7 +4,11 @@ import com.falconerd.staticcontinuance.machine.TileEntityFluidMachine;
 
 public class TileEntityTank extends TileEntityFluidMachine
 {
-    // TODO: Fix this
+    public TileEntityTank()
+    {
+        super(16000);
+    }
+
     public double getFluidRenderHeight()
     {
         double renderHeight = getFluidRatio();

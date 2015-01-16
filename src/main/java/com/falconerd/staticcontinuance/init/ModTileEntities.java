@@ -1,5 +1,6 @@
 package com.falconerd.staticcontinuance.init;
 
+import com.falconerd.staticcontinuance.machine.boiler.TileEntityBoiler;
 import com.falconerd.staticcontinuance.machine.tank.TileEntityTank;
 import com.falconerd.staticcontinuance.pipes.TileEntityPipe;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -10,5 +11,6 @@ public class ModTileEntities
     {
         GameRegistry.registerTileEntity(TileEntityTank.class, "Tank");
         GameRegistry.registerTileEntity(TileEntityPipe.class, "Pipe");
+        GameRegistry.registerTileEntity(TileEntityBoiler.class, "Boiler");
     }
 }

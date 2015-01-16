@@ -1,7 +1,7 @@
 package com.falconerd.staticcontinuance.network;
 
 import com.falconerd.staticcontinuance.network.message.MessageSetTankMode;
-import com.falconerd.staticcontinuance.network.message.MessageUpdateFluidMachines;
+import com.falconerd.staticcontinuance.network.message.MessageTransferFluid;
 import com.falconerd.staticcontinuance.reference.Reference;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
@@ -14,6 +14,6 @@ public class PacketHandler
     public static void init()
     {
         INSTANCE.registerMessage(MessageSetTankMode.class, MessageSetTankMode.class, 0, Side.SERVER);
-        INSTANCE.registerMessage(MessageUpdateFluidMachines.class, MessageUpdateFluidMachines.class, 1, Side.CLIENT);
+        INSTANCE.registerMessage(MessageTransferFluid.class, MessageTransferFluid.class, 1, Side.CLIENT);
     }
 }

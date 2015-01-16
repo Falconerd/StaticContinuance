@@ -21,6 +21,10 @@ public abstract class BlockContainerSC extends BlockContainer
         this(Material.iron);
     }
 
+    protected void init()
+    {
+    }
+
     @Override
     public String getUnlocalizedName()
     {

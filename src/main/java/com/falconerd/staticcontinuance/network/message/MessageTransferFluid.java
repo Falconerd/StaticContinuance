@@ -1,7 +1,6 @@
 package com.falconerd.staticcontinuance.network.message;
 
 import com.falconerd.staticcontinuance.machine.TileEntityFluidMachine;
-import com.falconerd.staticcontinuance.utility.LogHelper;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
@@ -11,7 +10,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class MessageUpdateFluidMachines implements IMessage, IMessageHandler<MessageUpdateFluidMachines, IMessage>
+public class MessageTransferFluid implements IMessage, IMessageHandler<MessageTransferFluid, IMessage>
 {
     public int fromX;
     public int fromY;
@@ -21,11 +20,11 @@ public class MessageUpdateFluidMachines implements IMessage, IMessageHandler<Mes
     public int toZ;
     public int amount;
 
-    public MessageUpdateFluidMachines()
+    public MessageTransferFluid()
     {
     }
 
-    public MessageUpdateFluidMachines(BlockPos from, BlockPos to, int amount)
+    public MessageTransferFluid(BlockPos from, BlockPos to, int amount)
     {
         this.fromX = from.getX();
         this.fromY = from.getY();
@@ -61,7 +60,7 @@ public class MessageUpdateFluidMachines implements IMessage, IMessageHandler<Mes
     }
 
     @Override
-    public IMessage onMessage(MessageUpdateFluidMachines message, MessageContext context)
+    public IMessage onMessage(MessageTransferFluid message, MessageContext context)
     {
         World world = FMLClientHandler.instance().getClient().theWorld;
 
@@ -72,7 +71,6 @@ public class MessageUpdateFluidMachines implements IMessage, IMessageHandler<Mes
         {
             FluidStack fluidStack = from.getTank().drain(message.amount, true);
             to.getTank().fill(fluidStack, true);
-            LogHelper.info("TRANSFERRED!");
         }
 
         return null;

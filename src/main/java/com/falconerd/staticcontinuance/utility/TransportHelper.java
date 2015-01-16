@@ -31,8 +31,6 @@ public class TransportHelper
      */
     public static void mapNetwork(BlockPos pos, World world)
     {
-        long timeStart = System.nanoTime();
-
         Set<BlockPos> machines = findMachines(pos, world);
 
         for (BlockPos machine : machines)
@@ -41,12 +39,6 @@ public class TransportHelper
 
             ((TileEntityFluidMachine) tileEntity).setNetworkedMachines(findMachines(machine, world));
         }
-
-        long timeEnd = System.nanoTime();
-
-        long timeTaken = timeEnd - timeStart;
-
-        LogHelper.info("Machines: " + machines.size() + " | Time: " + timeTaken + " nanoseconds");
     }
 
     public static Set<BlockPos> findMachines(BlockPos pos, World world)
@@ -110,6 +102,8 @@ public class TransportHelper
     public static void mapNode(BlockPos pos, World world, Boolean cascade)
     {
         TileEntity tileEntity = world.getTileEntity(pos);
+
+        LogHelper.info("Mapping ndoe: " + tileEntity);
 
         HashMap<EnumFacing, Boolean> machineConnections = new HashMap<EnumFacing, Boolean>();
         HashMap<EnumFacing, Boolean> pipeConnections = new HashMap<EnumFacing, Boolean>();
@@ -175,14 +169,12 @@ public class TransportHelper
     {
         BlockPos destination = getNearestFluidAcceptor(pos, world);
 
-        LogHelper.info("Nearest Acceptor is: " + destination);
-
         if (destination != null)
         {
             TileEntityFluidMachine to = (TileEntityFluidMachine) world.getTileEntity(destination);
             TileEntityFluidMachine from = (TileEntityFluidMachine) world.getTileEntity(pos);
 
-            int transferAmount = ConfigurationHandler.pipeFluidTransferRate * (20 / ConfigurationHandler.fluidNetworkTickDelay);
+            int transferAmount = ConfigurationHandler.pipeFluidTransferRate * ConfigurationHandler.fluidNetworkTickDelay;
 
             int capacity = to.getTank().getRemainingCapacity();
             int fluidAmount = from.getTank().getFluidAmount();
@@ -195,7 +187,7 @@ public class TransportHelper
             to.getTank().fill(fluidStack, true);
 
             // Send the packet to tell the client we have moved things
-            PacketHelper.updateFluidMachines(pos, destination, required);
+            PacketHelper.transferFluid(pos, destination, required);
         }
     }
 }
